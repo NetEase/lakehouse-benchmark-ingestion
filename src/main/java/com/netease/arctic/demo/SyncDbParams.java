@@ -1,15 +1,12 @@
 package com.netease.arctic.demo;
 
-import com.ververica.cdc.debezium.table.RowDataDebeziumDeserializeSchema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.catalog.ObjectPath;
-import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
-import org.apache.flink.table.catalog.exceptions.TableNotExistException;
-import org.apache.flink.table.data.conversion.RowRowConverter;
+import org.apache.flink.table.data.RowData;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.OutputTag;
 

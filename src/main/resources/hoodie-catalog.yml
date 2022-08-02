@@ -84,4 +84,4 @@ hoodie:
         hive_sync.auto_create_db: true
         hive_sync.ignore_exceptions: false
         hive_sync.skip_ro_suffix: false
-        hive_sync.support_timestamp: false
+        hive_sync.support_timestamp: true

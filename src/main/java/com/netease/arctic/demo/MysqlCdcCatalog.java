@@ -30,6 +30,7 @@ import org.apache.flink.table.catalog.exceptions.TableNotExistException;
 import org.apache.flink.table.factories.Factory;
 import org.apache.flink.table.types.AbstractDataType;
 import org.apache.flink.table.types.DataType;
+import org.apache.flink.table.types.logical.LogicalType;
 
 import java.sql.*;
 import java.util.*;
@@ -56,6 +57,11 @@ public class MysqlCdcCatalog extends AbstractJdbcCatalog {
     public static final String IDENTIFIER = "mysql-cdc";
 
     private final String hostname;
+
+    public int getPort() {
+        return port;
+    }
+
     private final int port;
 
     protected MysqlCdcCatalog(
@@ -70,7 +76,7 @@ public class MysqlCdcCatalog extends AbstractJdbcCatalog {
 
     public static void main(String[] args) throws DatabaseNotExistException, TableNotExistException {
         final MysqlCdcCatalog catalog = new MysqlCdcCatalog("mysql", "chbenchmark", "sys",
-                "netease", "10.171.161.168", 3306);
+                "netease", "10.171.161.168", 3332);
         catalog.listDatabases().forEach(System.out::println);
         catalog.listTables("test").forEach(System.out::println);
         System.out.println(catalog.getTable(new ObjectPath("test", "test")).getOptions());
@@ -157,6 +163,11 @@ public class MysqlCdcCatalog extends AbstractJdbcCatalog {
             DatabaseMetaData metaData = conn.getMetaData();
             final DatabaseMetaData infoSchema = metaData;
             final ResultSet rs = infoSchema.getColumns(tablePath.getDatabaseName(), tablePath.getDatabaseName(), tablePath.getObjectName(), null);
+            final ResultSet primaryKeys = infoSchema.getPrimaryKeys(tablePath.getDatabaseName(), tablePath.getDatabaseName(), tablePath.getObjectName());
+            final List<String> pkFields = new ArrayList<>();
+            while (primaryKeys.next()) {
+                pkFields.add(primaryKeys.getString("COLUMN_NAME"));
+            }
 
             final Schema.Builder builder = Schema.newBuilder();
             List<Column> cols = new ArrayList<>();
@@ -164,17 +175,17 @@ public class MysqlCdcCatalog extends AbstractJdbcCatalog {
             while (rs.next()) {
                 final String columnName = rs.getString("COLUMN_NAME");
                 final String typeName = rs.getString("TYPE_NAME");
-                final AbstractDataType<?> dataType = getDataType(typeName);
+                final AbstractDataType<?> dataType;
+                if(pkFields.contains(columnName)){
+                    dataType=getDataTypePrimary(typeName);
+                }else{
+                    dataType=getDataType(typeName);
+                }
                 builder.column(columnName, dataType);
                 cols.add(Column.physical(columnName, (DataType) dataType));
             }
             rs.close();
 
-            final ResultSet primaryKeys = infoSchema.getPrimaryKeys(tablePath.getDatabaseName(), tablePath.getDatabaseName(), tablePath.getObjectName());
-            final List<String> pkFields = new ArrayList<>();
-            while (primaryKeys.next()) {
-                pkFields.add(primaryKeys.getString("COLUMN_NAME"));
-            }
             builder.primaryKey(pkFields);
             primaryKeys.close();
 
@@ -237,15 +248,37 @@ public class MysqlCdcCatalog extends AbstractJdbcCatalog {
         final MysqlType mysqlType = MysqlType.getByName(typeName);
         switch (mysqlType) {
             case BIGINT:
+                return DataTypes.BIGINT();
+            case INT:
+                return DataTypes.INT();
+            case TIMESTAMP:
+                return DataTypes.TIMESTAMP(6);
+            case VARCHAR:
+                return DataTypes.STRING();
+            case DECIMAL:
+                return DataTypes.DECIMAL(16,8);
+            case CHAR:
+                return DataTypes.CHAR(Integer.MAX_VALUE);
+            case FLOAT:
+                return DataTypes.FLOAT();
+            default:
+                throw new RuntimeException("unsupport type" + typeName);
+        }
+    }
+
+    private AbstractDataType<?> getDataTypePrimary(final String typeName) {
+        final MysqlType mysqlType = MysqlType.getByName(typeName);
+        switch (mysqlType) {
+            case BIGINT:
                 return DataTypes.BIGINT().notNull();
             case INT:
                 return DataTypes.INT().notNull();
             case TIMESTAMP:
-                return DataTypes.TIMESTAMP(3);
+                return DataTypes.TIMESTAMP(6);
             case VARCHAR:
                 return DataTypes.STRING();
             case DECIMAL:
-                return DataTypes.DECIMAL(10,10);
+                return DataTypes.DECIMAL(16,8);
             case CHAR:
                 return DataTypes.CHAR(Integer.MAX_VALUE);
             case FLOAT:
@@ -271,4 +304,6 @@ public class MysqlCdcCatalog extends AbstractJdbcCatalog {
     public String getHostname() {
         return hostname;
     }
+
+
 }

@@ -29,13 +29,16 @@ import java.util.function.Consumer;
 public class SqlRunner {
 
     public static void main(String[] args) throws ParseException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        Class.forName("com.mysql.jdbc.Driver");
+        System.setProperty("HADOOP_USER_NAME", "sloth");
+
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         final StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
 
         final SqlRunnerOptions options = SqlRunnerOptions.parseFromArgs(args);
-        if (options.getEnableHiveSupport()) {
-            registerHiveCatalog(tEnv);
-        }
+//        if (options.getEnableHiveSupport()) {
+//            registerHiveCatalog(tEnv);
+//        }
 
         final Parser parser = ((StreamTableEnvironmentImpl) tEnv).getParser();
         List<ModifyOperation> dml = new ArrayList<>();

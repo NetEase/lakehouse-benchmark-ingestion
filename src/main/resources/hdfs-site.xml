@@ -1,438 +1,450 @@
-  <configuration>
-    
+<configuration>
+
     <property>
-      <name>dfs.balance.bandwidthPerSec</name>
-      <value>20485760</value>
+        <name>dfs.balance.bandwidthPerSec</name>
+        <value>20485760</value>
     </property>
-    
+
     <property>
-      <name>dfs.block.access.token.enable</name>
-      <value>true</value>
+        <name>dfs.block.access.token.enable</name>
+        <value>true</value>
     </property>
-    
+
     <property>
-      <name>dfs.block.replicator.classname</name>
-      <value>org.apache.hadoop.hdfs.server.blockmanagement.AvailableSpaceBlockPlacementPolicy</value>
+        <name>dfs.block.replicator.classname</name>
+        <value>org.apache.hadoop.hdfs.server.blockmanagement.AvailableSpaceBlockPlacementPolicy</value>
     </property>
-    
+
     <property>
-      <name>dfs.blockreport.initialDelay</name>
-      <value>120</value>
+        <name>dfs.blockreport.initialDelay</name>
+        <value>120</value>
     </property>
-    
+
     <property>
-      <name>dfs.blocksize</name>
-      <value>134217728</value>
+        <name>dfs.blocksize</name>
+        <value>134217728</value>
     </property>
-    
+
     <property>
-      <name>dfs.client.block.write.locateFollowingBlock.retries</name>
-      <value>10</value>
+        <name>dfs.client.block.write.locateFollowingBlock.retries</name>
+        <value>10</value>
     </property>
-    
+
     <property>
-      <name>dfs.client.read.shortcircuit</name>
-      <value>true</value>
+        <name>dfs.client.block.write.replace-datanode-on-failure.enable</name>
+        <value>true</value>
     </property>
-    
+
     <property>
-      <name>dfs.client.read.shortcircuit.streams.cache.size</name>
-      <value>4096</value>
+        <name>dfs.client.block.write.replace-datanode-on-failure.policy</name>
+        <value>NEVER</value>
     </property>
-    
+
     <property>
-      <name>dfs.client.read.shortcircuit.streams.cache.size.expiry.ms</name>
-      <value>1000</value>
+        <name>dfs.client.read.shortcircuit</name>
+        <value>true</value>
     </property>
-    
+
     <property>
-      <name>dfs.client.retry.policy.enabled</name>
-      <value>false</value>
+        <name>dfs.client.read.shortcircuit.streams.cache.size</name>
+        <value>4096</value>
     </property>
-    
+
     <property>
-      <name>dfs.client.socket-timeout</name>
-      <value>3000000</value>
+        <name>dfs.client.read.shortcircuit.streams.cache.size.expiry.ms</name>
+        <value>1000</value>
     </property>
-    
+
     <property>
-      <name>dfs.cluster.administrators</name>
-      <value> hdfs</value>
+        <name>dfs.client.retry.policy.enabled</name>
+        <value>false</value>
     </property>
-    
+
     <property>
-      <name>dfs.content-summary.limit</name>
-      <value>5000</value>
+        <name>dfs.client.socket-timeout</name>
+        <value>3000000</value>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.address</name>
-      <value>0.0.0.0:50010</value>
+        <name>dfs.cluster.administrators</name>
+        <value>hdfs</value>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-preference-fraction</name>
-      <value>0.75f</value>
+        <name>dfs.content-summary.limit</name>
+        <value>5000</value>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-threshold</name>
-      <value>10737418240</value>
+        <name>dfs.datanode.address</name>
+        <value>0.0.0.0:50010</value>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.balance.bandwidthPerSec</name>
-      <value>6250000</value>
+        <name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-preference-fraction</name>
+        <value>0.75f</value>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.data.dir</name>
-      <value>/mnt/dfs/0/data,/mnt/dfs/1/data,/mnt/dfs/2/data,/mnt/dfs/3/data,/mnt/dfs/4/data,/mnt/dfs/5/data,/mnt/dfs/6/data,/mnt/dfs/7/data,/mnt/dfs/8/data,/mnt/dfs/9/data,/mnt/dfs/10/data,/mnt/dfs/11/data</value>
-      <final>true</final>
+        <name>dfs.datanode.available-space-volume-choosing-policy.balanced-space-threshold</name>
+        <value>10737418240</value>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.data.dir.perm</name>
-      <value>750</value>
+        <name>dfs.datanode.balance.bandwidthPerSec</name>
+        <value>6250000</value>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.du.reserved</name>
-      <value>147584150016</value>
+        <name>dfs.datanode.data.dir</name>
+        <value>
+            /mnt/dfs/0/data,/mnt/dfs/1/data,/mnt/dfs/2/data,/mnt/dfs/3/data,/mnt/dfs/4/data,/mnt/dfs/5/data,/mnt/dfs/6/data,/mnt/dfs/7/data,/mnt/dfs/8/data,/mnt/dfs/9/data,/mnt/dfs/10/data,/mnt/dfs/11/data
+        </value>
+        <final>true</final>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.failed.volumes.tolerated</name>
-      <value>2</value>
-      <final>true</final>
+        <name>dfs.datanode.data.dir.perm</name>
+        <value>750</value>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.fsdataset.volume.choosing.policy</name>
-      <value>org.apache.hadoop.hdfs.server.datanode.fsdataset.AvailableSpaceVolumeChoosingPolicy</value>
+        <name>dfs.datanode.du.reserved</name>
+        <value>147584150016</value>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.handler.count</name>
-      <value>48</value>
+        <name>dfs.datanode.failed.volumes.tolerated</name>
+        <value>2</value>
+        <final>true</final>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.hdfs-blocks-metadata.enabled</name>
-      <value>true</value>
+        <name>dfs.datanode.fsdataset.volume.choosing.policy</name>
+        <value>org.apache.hadoop.hdfs.server.datanode.fsdataset.AvailableSpaceVolumeChoosingPolicy</value>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.http.address</name>
-      <value>0.0.0.0:50075</value>
+        <name>dfs.datanode.handler.count</name>
+        <value>48</value>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.https.address</name>
-      <value>0.0.0.0:50475</value>
+        <name>dfs.datanode.hdfs-blocks-metadata.enabled</name>
+        <value>true</value>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.ipc.address</name>
-      <value>0.0.0.0:8010</value>
+        <name>dfs.datanode.http.address</name>
+        <value>0.0.0.0:50075</value>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.max.locked.memory</name>
-      <value>0</value>
+        <name>dfs.datanode.https.address</name>
+        <value>0.0.0.0:50475</value>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.max.transfer.threads</name>
-      <value>4096</value>
+        <name>dfs.datanode.ipc.address</name>
+        <value>0.0.0.0:8010</value>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.max.xcievers</name>
-      <value>4096</value>
+        <name>dfs.datanode.max.locked.memory</name>
+        <value>0</value>
     </property>
-    
+
     <property>
-      <name>dfs.datanode.socket.write.timeout</name>
-      <value>3000000</value>
+        <name>dfs.datanode.max.transfer.threads</name>
+        <value>4096</value>
     </property>
-    
+
     <property>
-      <name>dfs.domain.socket.path</name>
-      <value>/var/lib/hadoop-hdfs/dn_socket</value>
+        <name>dfs.datanode.max.xcievers</name>
+        <value>4096</value>
     </property>
-    
+
     <property>
-      <name>dfs.heartbeat.interval</name>
-      <value>3</value>
+        <name>dfs.datanode.socket.write.timeout</name>
+        <value>3000000</value>
     </property>
-    
+
     <property>
-      <name>dfs.hosts.exclude</name>
-      <value>/etc/hadoop/conf/dfs.exclude</value>
+        <name>dfs.domain.socket.path</name>
+        <value>/var/lib/hadoop-hdfs/dn_socket</value>
     </property>
-    
+
     <property>
-      <name>dfs.http.policy</name>
-      <value>HTTP_ONLY</value>
+        <name>dfs.heartbeat.interval</name>
+        <value>3</value>
     </property>
-    
+
     <property>
-      <name>dfs.https.enable</name>
-      <value>false</value>
+        <name>dfs.hosts.exclude</name>
+        <value>/etc/hadoop/conf/dfs.exclude</value>
     </property>
-    
+
     <property>
-      <name>dfs.https.port</name>
-      <value>50470</value>
+        <name>dfs.http.policy</name>
+        <value>HTTP_ONLY</value>
     </property>
-    
+
     <property>
-      <name>dfs.image.compress</name>
-      <value>true</value>
+        <name>dfs.https.enable</name>
+        <value>false</value>
     </property>
-    
+
     <property>
-      <name>dfs.image.compression.codec</name>
-      <value>com.hadoop.compression.lzo.LzoCodec</value>
+        <name>dfs.https.port</name>
+        <value>50470</value>
     </property>
-    
+
     <property>
-      <name>dfs.image.transfer.timeout</name>
-      <value>1200000</value>
+        <name>dfs.image.compress</name>
+        <value>true</value>
     </property>
-    
+
     <property>
-      <name>dfs.journalnode.edits.dir</name>
-      <value>/hadoop/hdfs/journalnode</value>
+        <name>dfs.image.compression.codec</name>
+        <value>com.hadoop.compression.lzo.LzoCodec</value>
     </property>
-    
+
     <property>
-      <name>dfs.journalnode.http-address</name>
-      <value>0.0.0.0:8480</value>
+        <name>dfs.image.transfer.timeout</name>
+        <value>1200000</value>
     </property>
-    
+
     <property>
-      <name>dfs.journalnode.https-address</name>
-      <value>0.0.0.0:8481</value>
+        <name>dfs.journalnode.edits.dir</name>
+        <value>/hadoop/hdfs/journalnode</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.accesstime.precision</name>
-      <value>0</value>
+        <name>dfs.journalnode.http-address</name>
+        <value>0.0.0.0:8480</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.acls.enabled</name>
-      <value>true</value>
+        <name>dfs.journalnode.https-address</name>
+        <value>0.0.0.0:8481</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.audit.log.async</name>
-      <value>true</value>
+        <name>dfs.namenode.accesstime.precision</name>
+        <value>0</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.avoid.read.stale.datanode</name>
-      <value>true</value>
+        <name>dfs.namenode.acls.enabled</name>
+        <value>true</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.avoid.write.stale.datanode</name>
-      <value>true</value>
+        <name>dfs.namenode.audit.log.async</name>
+        <value>true</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.checkpoint.dir</name>
-      <value>/home/hadoop/hdfs/namesecondary</value>
+        <name>dfs.namenode.avoid.read.stale.datanode</name>
+        <value>true</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.checkpoint.edits.dir</name>
-      <value>${dfs.namenode.checkpoint.dir}</value>
+        <name>dfs.namenode.avoid.write.stale.datanode</name>
+        <value>true</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.checkpoint.period</name>
-      <value>21600</value>
+        <name>dfs.namenode.checkpoint.dir</name>
+        <value>/home/hadoop/hdfs/namesecondary</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.checkpoint.txns</name>
-      <value>1000000</value>
+        <name>dfs.namenode.checkpoint.edits.dir</name>
+        <value>${dfs.namenode.checkpoint.dir}</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.fslock.fair</name>
-      <value>false</value>
+        <name>dfs.namenode.checkpoint.period</name>
+        <value>21600</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.handler.count</name>
-      <value>1000</value>
+        <name>dfs.namenode.checkpoint.txns</name>
+        <value>1000000</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.http-address</name>
-      <value>hz11-trino-arctic-0.jd.163.org:50070</value>
-      <final>true</final>
+        <name>dfs.namenode.fslock.fair</name>
+        <value>false</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.http-bind-host</name>
-      <value>0.0.0.0</value>
-      <final>true</final>
+        <name>dfs.namenode.handler.count</name>
+        <value>1000</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.https-address</name>
-      <value>hz11-trino-arctic-0.jd.163.org:50470</value>
+        <name>dfs.namenode.http-address</name>
+        <value>hz11-trino-arctic-0.jd.163.org:50070</value>
+        <final>true</final>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.https-bind-host</name>
-      <value>0.0.0.0</value>
-      <final>true</final>
+        <name>dfs.namenode.http-bind-host</name>
+        <value>0.0.0.0</value>
+        <final>true</final>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.name.dir</name>
-      <value>/home/hadoop/hdfs/name</value>
-      <final>true</final>
+        <name>dfs.namenode.https-address</name>
+        <value>hz11-trino-arctic-0.jd.163.org:50470</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.name.dir.restore</name>
-      <value>true</value>
+        <name>dfs.namenode.https-bind-host</name>
+        <value>0.0.0.0</value>
+        <final>true</final>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.rpc-address</name>
-      <value>hz11-trino-arctic-0.jd.163.org:8020</value>
+        <name>dfs.namenode.name.dir</name>
+        <value>/home/hadoop/hdfs/name</value>
+        <final>true</final>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.rpc-bind-host</name>
-      <value>0.0.0.0</value>
-      <final>true</final>
+        <name>dfs.namenode.name.dir.restore</name>
+        <value>true</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.safemode.threshold-pct</name>
-      <value>1</value>
+        <name>dfs.namenode.rpc-address</name>
+        <value>hz11-trino-arctic-0.jd.163.org:8020</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.secondary.http-address</name>
-      <value>hz11-trino-arctic-1.jd.163.org:50090</value>
+        <name>dfs.namenode.rpc-bind-host</name>
+        <value>0.0.0.0</value>
+        <final>true</final>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.service.handler.count</name>
-      <value>20</value>
+        <name>dfs.namenode.safemode.threshold-pct</name>
+        <value>1</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.servicerpc-address</name>
-      <value>hz11-trino-arctic-0.jd.163.org:8021</value>
+        <name>dfs.namenode.secondary.http-address</name>
+        <value>hz11-trino-arctic-1.jd.163.org:50090</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.servicerpc-bind-host</name>
-      <value>0.0.0.0</value>
-      <final>true</final>
+        <name>dfs.namenode.service.handler.count</name>
+        <value>20</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.stale.datanode.interval</name>
-      <value>30000</value>
+        <name>dfs.namenode.servicerpc-address</name>
+        <value>hz11-trino-arctic-0.jd.163.org:8021</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.startup.delay.block.deletion.sec</name>
-      <value>3600</value>
+        <name>dfs.namenode.servicerpc-bind-host</name>
+        <value>0.0.0.0</value>
+        <final>true</final>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.write.stale.datanode.ratio</name>
-      <value>1.0f</value>
+        <name>dfs.namenode.stale.datanode.interval</name>
+        <value>30000</value>
     </property>
-    
+
     <property>
-      <name>dfs.namenode.xattrs.enabled</name>
-      <value>false</value>
+        <name>dfs.namenode.startup.delay.block.deletion.sec</name>
+        <value>3600</value>
     </property>
-    
+
     <property>
-      <name>dfs.permissions.enabled</name>
-      <value>true</value>
+        <name>dfs.namenode.write.stale.datanode.ratio</name>
+        <value>1.0f</value>
     </property>
-    
+
     <property>
-      <name>dfs.permissions.superusergroup</name>
-      <value>hdfs</value>
+        <name>dfs.namenode.xattrs.enabled</name>
+        <value>false</value>
     </property>
-    
+
     <property>
-      <name>dfs.qjournal.start-segment.timeout.ms</name>
-      <value>60000</value>
+        <name>dfs.permissions.enabled</name>
+        <value>true</value>
     </property>
-    
+
     <property>
-      <name>dfs.qjournal.write-txns.timeout.ms</name>
-      <value>60000</value>
+        <name>dfs.permissions.superusergroup</name>
+        <value>hdfs</value>
     </property>
-    
+
     <property>
-      <name>dfs.replication</name>
-      <value>3</value>
+        <name>dfs.qjournal.start-segment.timeout.ms</name>
+        <value>60000</value>
     </property>
-    
+
     <property>
-      <name>dfs.replication.max</name>
-      <value>50</value>
+        <name>dfs.qjournal.write-txns.timeout.ms</name>
+        <value>60000</value>
     </property>
-    
+
     <property>
-      <name>dfs.support.append</name>
-      <value>true</value>
-      <final>true</final>
+        <name>dfs.replication</name>
+        <value>3</value>
     </property>
-    
+
     <property>
-      <name>dfs.thrift.address</name>
-      <value>0.0.0.0:10090</value>
+        <name>dfs.replication.max</name>
+        <value>50</value>
     </property>
-    
+
     <property>
-      <name>dfs.webhdfs.enabled</name>
-      <value>true</value>
-      <final>true</final>
+        <name>dfs.support.append</name>
+        <value>true</value>
+        <final>true</final>
     </property>
-    
+
     <property>
-      <name>fs.permissions.umask-mode</name>
-      <value>027</value>
+        <name>dfs.thrift.address</name>
+        <value>0.0.0.0:10090</value>
     </property>
-    
+
     <property>
-      <name>fs.trash.interval</name>
-      <value>1440</value>
+        <name>dfs.webhdfs.enabled</name>
+        <value>true</value>
+        <final>true</final>
     </property>
-    
+
     <property>
-      <name>ipc.client.ping</name>
-      <value>false</value>
+        <name>fs.permissions.umask-mode</name>
+        <value>027</value>
     </property>
-    
+
     <property>
-      <name>ipc.ping.interval</name>
-      <value>300000</value>
+        <name>fs.trash.interval</name>
+        <value>1440</value>
     </property>
-    
+
     <property>
-      <name>ipc.server.listen.queue.size</name>
-      <value>1024</value>
+        <name>ipc.client.ping</name>
+        <value>false</value>
     </property>
-    
-  </configuration>
+
+    <property>
+        <name>ipc.ping.interval</name>
+        <value>300000</value>
+    </property>
+
+    <property>
+        <name>ipc.server.listen.queue.size</name>
+        <value>1024</value>
+    </property>
+
+</configuration>

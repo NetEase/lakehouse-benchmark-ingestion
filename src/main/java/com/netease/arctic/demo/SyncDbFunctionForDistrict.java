@@ -13,7 +13,6 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ConfigOptions;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.runtime.state.storage.FileSystemCheckpointStorage;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.table.api.DataTypes;
@@ -35,15 +34,14 @@ import org.apache.flink.table.types.logical.RowType;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
-import org.apache.kafka.common.message.LeaderAndIsrRequestData;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.log4j.Logger;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.ververica.cdc.connectors.mysql.table.MySqlReadableMetadata.DATABASE_NAME;
 import static com.ververica.cdc.connectors.mysql.table.MySqlReadableMetadata.TABLE_NAME;
@@ -54,11 +52,11 @@ import static java.util.stream.Collectors.toMap;
  * TODO: per table config. per table sql. multiple table merge into one
  */
 @SuppressWarnings("unused")
-public class SyncDbFunction implements Consumer<CallContext> {
+public class SyncDbFunctionForDistrict implements Consumer<CallContext> {
     private static final ConfigOption<String> SRC_DB = ConfigOptions.key("custom.sync-db.source.db").stringType().noDefaultValue();
     private static final ConfigOption<String> DEST_DB = ConfigOptions.key("custom.sync-db.dest.db").stringType().noDefaultValue();
 
-    private static Logger logger = Logger.getLogger(SyncDbFunction.class);
+    private static Logger logger = Logger.getLogger(SyncDbFunctionForDistrict.class);
 
     private static String getKey(RowData r) {
         final JoinedRowData rowData = (JoinedRowData) r;
@@ -93,15 +91,6 @@ public class SyncDbFunction implements Consumer<CallContext> {
         final MysqlCdcCatalog mysql = (MysqlCdcCatalog) tEnv.getCatalog(srcCatalogDb[0]).orElseThrow(() -> new RuntimeException(srcCatalogDb[0] + " catalog not exists"));
         final String mysqlDb = srcCatalogDb[1];
 
-        List<String> list = mysql.listTables(mysqlDb);
-        list.remove("order_line");
-//        list.remove("district");
-
-        ArrayList<String> tableList = new ArrayList<>();
-        for (String table : list) {
-            tableList.add(srcCatalogDb[1] + "." + table);
-        }
-
         final String[] destCatalogDb = configuration.getString(DEST_DB).split("\\.");
         final String hudiCatalogName = destCatalogDb[0];
 
@@ -109,11 +98,11 @@ public class SyncDbFunction implements Consumer<CallContext> {
         final String hudiDb = destCatalogDb[1];
 
         final List<Tuple2<ObjectPath, ResolvedCatalogTable>> pathAndTable = getPathAndTable(mysql, mysqlDb);
-        List<Tuple2<ObjectPath, ResolvedCatalogTable>> s = pathAndTable.stream().filter(e -> !e.f0.getObjectName().equals("order_line")).collect(toList());
+        List<Tuple2<ObjectPath, ResolvedCatalogTable>> s = pathAndTable.stream().filter(e -> e.f0.getObjectName().equals("district")).collect(toList());
         createHudiTable(hudi, hudiDb, s);
 //        createHudiTable(hudi, hudiDb, pathAndTable);
 
-        final MySqlSource<RowData> source = getMySqlSource(srcCatalogDb, tableList, mysql, getDebeziumDeserializeSchemas(s));
+        final MySqlSource<RowData> source = getMySqlSource(srcCatalogDb, mysql, getDebeziumDeserializeSchemas(s));
         final SingleOutputStreamOperator<Void> process = context.getEnv()
                 .fromSource(source, WatermarkStrategy.noWatermarks(), "mysql").uid("mysql").setParallelism(8)
                 .process(new RowDataVoidProcessFunction(getConverters(s))).uid("split stream").name("split stream").setParallelism(8);
@@ -153,32 +142,36 @@ public class SyncDbFunction implements Consumer<CallContext> {
             try {
                 // TODO: read external options hoodie-catalog.yml using context.getEnv().getCachedFiles()
                 final Map<String, String> options = new HashMap<>();
-                options.put("hive_sync.support_timestamp","true");
-//                options.put("hoodie.datasource.hive_sync.support_timestamp","true");
                 options.put("hive_sync.enable", "true");
                 options.put("hive_sync.mode", "hms");
                 options.put("hive_sync.metastore.uris", "thrift://hz11-trino-arctic-0.jd.163.org:9083");
+//                options.put("hive_sync.skip_ro_suffix", "true");
+
                 options.put("hive_sync.db", hudiDb);
                 options.put("hive_sync.table", e.f0.getObjectName());
-
+                options.put("hive_sync.support_timestamp","true");
+                options.put("hoodie.datasource.hive_sync.support_timestamp","true");
 
                 options.put("table.type", "MERGE_ON_READ");
                 options.put("read.tasks", "8");
                 options.put("write.bucket_assign.tasks", "8");
                 options.put("write.tasks", "8");
                 options.put("write.batch.size", "128");
-//                options.put("write.log_block.size", "1");
+//                options.put("write.log_block.size", "256");
+//                options.put("write.rate.limit", "10000");
+
 //                options.put("compaction.async.enabled","false");
-//                options.put("compaction.schedule.enabled","true");
+//                options.put("compaction.schedule.enabled","false");
 //                options.put("clean.async.enabled","true");
+
 
                 options.put("compaction.tasks", "8");
                 options.put("compaction.trigger.strategy", "num_or_time");
-                options.put("compaction.delta_commits", "3");
-                options.put("compaction.delta_seconds", "180");
-                options.put("compaction.max_memory", "1024");
+                options.put("compaction.delta_commits", "1");
+                options.put("compaction.delta_seconds", "60");
                 options.put("hoodie.embed.timeline.server", "false");
 
+//                options.put("compaction.delta_seconds", "60");
 //                options.put("hoodie.clean.async", "true");
 //                options.put("hoodie.cleaner.parallelism", "2");
                 ObjectPath objectPath = new ObjectPath(hudiDb, e.f0.getObjectName());
@@ -197,7 +190,7 @@ public class SyncDbFunction implements Consumer<CallContext> {
         });
     }
 
-    private MySqlSource<RowData> getMySqlSource(final String[] srcCatalogDb, List<String> tableList, final MysqlCdcCatalog mysql, final Map<String, RowDataDebeziumDeserializeSchema> maps) {
+    private MySqlSource<RowData> getMySqlSource(final String[] srcCatalogDb, final MysqlCdcCatalog mysql, final Map<String, RowDataDebeziumDeserializeSchema> maps) {
 
         // TODO: extract hostname port from url
         return MySqlSource.<RowData>builder()
@@ -208,7 +201,7 @@ public class SyncDbFunction implements Consumer<CallContext> {
 //                .databaseList(srcCatalogDb)
                 .databaseList(srcCatalogDb[1])
 //                .tableList(".*")
-                .tableList(tableList.toArray(new String[tableList.size()]))
+                .tableList(srcCatalogDb[1] + ".district")
                 .deserializer(new CompositeDebeziuDeserializationSchema(maps))
                 .build();
     }
