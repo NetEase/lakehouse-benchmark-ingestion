@@ -26,7 +26,7 @@ CREATE CATALOG mysql WITH(
 
 CREATE CATALOG hudi WITH(
     'type' = 'hudi',
-    'default-database' = 'hudi100wdynamic10',
+    'default-database' = 'hudi100wstatic2',
     'catalog.path' = 'hdfs://hz11-trino-arctic-0.jd.163.org:8020/user/warehouse'
 );
 
@@ -35,7 +35,7 @@ CREATE CATALOG hudi WITH(
 -- INSERT INTO print
 -- SELECT * FROM mysql.test.test;
 set custom.sync-db.source.db=mysql.hudi100w;
-set custom.sync-db.dest.db=hudi.hudi100wdynamic10;
--- call com.netease.arctic.demo.SyncDbFunction;
+set custom.sync-db.dest.db=hudi.hudi100wstatic2;
+call com.netease.arctic.demo.SyncDbFunction;
 -- call com.netease.arctic.demo.SyncDbFunctionForDistrict;
-call com.netease.arctic.demo.SyncDbFunctionForHugeTable;
+-- call com.netease.arctic.demo.SyncDbFunctionForHugeTable;

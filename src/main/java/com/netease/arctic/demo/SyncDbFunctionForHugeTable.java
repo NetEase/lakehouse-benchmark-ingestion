@@ -161,8 +161,8 @@ public class SyncDbFunctionForHugeTable implements Consumer<CallContext> {
 //                options.put("write.log_block.size", "256");
 //                options.put("write.rate.limit", "10000");
 
-                options.put("compaction.async.enabled","false");
-                options.put("compaction.schedule.enabled","true");
+//                options.put("compaction.async.enabled","false");
+//                options.put("compaction.schedule.enabled","true");
 //                options.put("clean.async.enabled","true");
 
 
