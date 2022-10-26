@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.netease.arctic.demo;
+package com.netease.arctic.demo.source;
 
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.table.catalog.Catalog;

@@ -1,4 +1,4 @@
-package com.netease.arctic.demo;
+package com.netease.arctic.demo.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,15 +11,17 @@ import org.apache.flink.types.Row;
 import org.apache.flink.util.OutputTag;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SyncDbParams implements Serializable {
+public class SyncDbParams2 implements Serializable {
     Schema schema;
-    OutputTag<Row> tag;
+    OutputTag<RowData> tag;
     String db;
     String table;
     ObjectPath path;
+    List<String> primaryKeys;
 }

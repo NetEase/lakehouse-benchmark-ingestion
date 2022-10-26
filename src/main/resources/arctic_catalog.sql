@@ -17,25 +17,18 @@ set execution.checkpointing.tolerable-failed-checkpoints=100;
 
 CREATE CATALOG mysql WITH(
     'type' = 'mysql-cdc',
-    'default-database' = 'hudi100w',
+    'default-database' = 'test2w',
     'username' = 'rds',
     'password' = '123456',
     'hostname' = 'sloth-commerce-test2.jd.163.org',
     'port'='3332'
 );
 
-CREATE CATALOG hudi WITH(
-    'type' = 'hudi',
-    'default-database' = 'hudi100wstaticNew',
-    'catalog.path' = 'hdfs://hz11-trino-arctic-0.jd.163.org:8020/user/warehouse'
+CREATE CATALOG arctic WITH(
+    'type' = 'arctic',
+    'metastore.url'='thrift://10.196.98.23:18112/trino_online_env'
 );
 
--- CREATE TABLE print WITH('connector'='print') LIKE mysql.test.test(EXCLUDING ALL);
-
--- INSERT INTO print
--- SELECT * FROM mysql.test.test;
-set custom.sync-db.source.db=mysql.hudi100w;
-set custom.sync-db.dest.db=hudi.hudi100wstaticNew;
--- call com.netease.arctic.demo.SyncDbFunction;
--- call com.netease.arctic.demo.SyncDbFunctionForDistrict;
-call com.netease.arctic.demo.SyncDbFunctionForHugeTable;
+set custom.sync-db.source.db=mysql.test2w;
+set custom.sync-db.dest.db=arctic.arctic2wtest;
+call com.netease.arctic.demo.sink.ArcticCatalogSync;

@@ -1,4 +1,4 @@
-package com.netease.arctic.demo;
+package com.netease.arctic.demo.test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

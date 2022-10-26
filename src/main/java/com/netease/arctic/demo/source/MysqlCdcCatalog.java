@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.netease.arctic.demo;
+package com.netease.arctic.demo.source;
 
 import com.mysql.cj.MysqlType;
 import com.ververica.cdc.connectors.mysql.table.MySqlTableSourceFactory;
@@ -30,7 +30,6 @@ import org.apache.flink.table.catalog.exceptions.TableNotExistException;
 import org.apache.flink.table.factories.Factory;
 import org.apache.flink.table.types.AbstractDataType;
 import org.apache.flink.table.types.DataType;
-import org.apache.flink.table.types.logical.LogicalType;
 
 import java.sql.*;
 import java.util.*;
@@ -64,7 +63,7 @@ public class MysqlCdcCatalog extends AbstractJdbcCatalog {
 
     private final int port;
 
-    protected MysqlCdcCatalog(
+    public MysqlCdcCatalog(
         String catalogName,
         String defaultDatabase,
         String username,

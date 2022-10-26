@@ -1,6 +1,16 @@
-package com.netease.arctic.demo;
+package com.netease.arctic.demo.other;
 
-import com.netease.arctic.demo.function.CallContext;
+import com.netease.arctic.catalog.CatalogLoader;
+import com.netease.arctic.demo.entity.CallContext;
+import com.netease.arctic.demo.entity.SyncDbParams;
+import com.netease.arctic.demo.source.MysqlCdcCatalog;
+import com.netease.arctic.flink.InternalCatalogBuilder;
+import com.netease.arctic.flink.catalog.ArcticCatalog;
+import com.netease.arctic.flink.table.ArcticTableLoader;
+import com.netease.arctic.flink.util.ArcticUtils;
+import com.netease.arctic.flink.write.FlinkSink;
+import com.netease.arctic.table.ArcticTable;
+import com.netease.arctic.table.TableIdentifier;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.ververica.cdc.connectors.mysql.table.MySqlDeserializationConverterFactory;
 import com.ververica.cdc.debezium.DebeziumDeserializationSchema;
@@ -13,16 +23,13 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ConfigOptions;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.Schema;
-import org.apache.flink.table.api.StatementSet;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.apache.flink.table.catalog.Catalog;
-import org.apache.flink.table.catalog.CatalogDatabaseImpl;
-import org.apache.flink.table.catalog.ObjectPath;
-import org.apache.flink.table.catalog.ResolvedCatalogTable;
+import org.apache.flink.table.catalog.*;
 import org.apache.flink.table.catalog.exceptions.DatabaseAlreadyExistException;
 import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
 import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
@@ -36,8 +43,8 @@ import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
-import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,11 +59,14 @@ import static java.util.stream.Collectors.toMap;
  * TODO: per table config. per table sql. multiple table merge into one
  */
 @SuppressWarnings("unused")
-public class SyncDbFunctionForDistrict implements Consumer<CallContext> {
+public class SyncDbFunctionForArctic implements Consumer<CallContext> {
     private static final ConfigOption<String> SRC_DB = ConfigOptions.key("custom.sync-db.source.db").stringType().noDefaultValue();
     private static final ConfigOption<String> DEST_DB = ConfigOptions.key("custom.sync-db.dest.db").stringType().noDefaultValue();
+    private static final String metastoreUrl = "thrift://10.196.98.23:18113/trino_online_env";
 
-    private static Logger logger = Logger.getLogger(SyncDbFunctionForDistrict.class);
+    private static final String ARCTIC_CATALOG = "trino_online_env";
+    private static final String DBNAME = "arctic0823";
+    private static final com.netease.arctic.catalog.ArcticCatalog catalog = CatalogLoader.load(metastoreUrl);
 
     private static String getKey(RowData r) {
         final JoinedRowData rowData = (JoinedRowData) r;
@@ -91,6 +101,19 @@ public class SyncDbFunctionForDistrict implements Consumer<CallContext> {
         final MysqlCdcCatalog mysql = (MysqlCdcCatalog) tEnv.getCatalog(srcCatalogDb[0]).orElseThrow(() -> new RuntimeException(srcCatalogDb[0] + " catalog not exists"));
         final String mysqlDb = srcCatalogDb[1];
 
+        List<String> list = mysql.listTables(mysqlDb);
+        list.remove("order_line");
+//        list.remove("district");
+
+        ArrayList<String> tableList = new ArrayList<>();
+        for (String table : list) {
+            tableList.add(srcCatalogDb[1] + "." + table);
+        }
+
+        Map<String, String> properties = new HashMap<>();
+        InternalCatalogBuilder catalogBuilder = InternalCatalogBuilder.builder().metastoreUrl(metastoreUrl).properties(properties);
+        ArcticCatalog arcticCatalog = new ArcticCatalog(ARCTIC_CATALOG, DBNAME, catalogBuilder);
+
         final String[] destCatalogDb = configuration.getString(DEST_DB).split("\\.");
         final String hudiCatalogName = destCatalogDb[0];
 
@@ -98,22 +121,42 @@ public class SyncDbFunctionForDistrict implements Consumer<CallContext> {
         final String hudiDb = destCatalogDb[1];
 
         final List<Tuple2<ObjectPath, ResolvedCatalogTable>> pathAndTable = getPathAndTable(mysql, mysqlDb);
-        List<Tuple2<ObjectPath, ResolvedCatalogTable>> s = pathAndTable.stream().filter(e -> e.f0.getObjectName().equals("district")).collect(toList());
-        createHudiTable(hudi, hudiDb, s);
-//        createHudiTable(hudi, hudiDb, pathAndTable);
+        List<Tuple2<ObjectPath, ResolvedCatalogTable>> s = pathAndTable.stream().filter(e -> !e.f0.getObjectName().equals("order_line")).collect(toList());
+        createArcticTable(hudi, hudiDb, s);
 
-        final MySqlSource<RowData> source = getMySqlSource(srcCatalogDb, mysql, getDebeziumDeserializeSchemas(s));
+        final MySqlSource<RowData> source = getMySqlSource(srcCatalogDb, tableList, mysql, getDebeziumDeserializeSchemas(s));
         final SingleOutputStreamOperator<Void> process = context.getEnv()
                 .fromSource(source, WatermarkStrategy.noWatermarks(), "mysql").uid("mysql").setParallelism(8)
                 .process(new RowDataVoidProcessFunction(getConverters(s))).uid("split stream").name("split stream").setParallelism(8);
-        final StatementSet set = tEnv.createStatementSet();
         getParamsList(mysqlDb, s).forEach(p -> {
-            tEnv.createTemporaryView(p.table, process.getSideOutput(p.tag), p.schema);
-            String sql = String.format("INSERT INTO %s.%s.%s SELECT f0.* FROM %s", hudiCatalogName, hudiDb, p.path.getObjectName(), p.table);
-            set.addInsertSql(sql);
+            try {
+                arcticSink(process.getSideOutput(p.getTag()),arcticCatalog,catalogBuilder,p.getPath().getObjectName());
+            } catch (TableNotExistException e) {
+                throw new RuntimeException(e);
+            }
         });
-        set.execute();
+        tEnv.execute("sync-db");
+    }
 
+    private static void arcticSink(DataStream input, ArcticCatalog arcticCatalog, InternalCatalogBuilder catalogBuilder, String tableName) throws TableNotExistException {
+
+        ObjectPath objectPath = new ObjectPath(DBNAME, tableName);
+
+        TableIdentifier identifier = TableIdentifier.of(
+            arcticCatalog.getName(),
+            objectPath.getDatabaseName(),
+            objectPath.getObjectName());
+
+        ArcticTableLoader tableLoader = ArcticTableLoader.of(identifier, catalogBuilder);
+        CatalogTable flinkTable = (CatalogTable) arcticCatalog.getTable(objectPath);
+
+        ArcticTable table = ArcticUtils.loadArcticTable(tableLoader);
+        table.properties().put("arctic.emit.mode", "file");
+        FlinkSink.forRowData(input)
+            .table(table)
+            .tableLoader(tableLoader)
+            .flinkSchema(flinkTable.getSchema())
+            .build();
     }
 
     private List<Tuple2<ObjectPath, ResolvedCatalogTable>> getPathAndTable(final MysqlCdcCatalog mysql, final String mysqlDb) throws DatabaseNotExistException {
@@ -129,7 +172,7 @@ public class SyncDbFunctionForDistrict implements Consumer<CallContext> {
     }
 
 
-    private void createHudiTable(final Catalog hudi, final String hudiDb, final List<Tuple2<ObjectPath, ResolvedCatalogTable>> pathAndTable) {
+    private void createArcticTable(final Catalog hudi, final String hudiDb, final List<Tuple2<ObjectPath, ResolvedCatalogTable>> pathAndTable) {
         if (!hudi.databaseExists(hudiDb)) {
             try {
                 hudi.createDatabase(hudiDb, new CatalogDatabaseImpl(new HashMap<>(), "new db"), false);
@@ -142,36 +185,32 @@ public class SyncDbFunctionForDistrict implements Consumer<CallContext> {
             try {
                 // TODO: read external options hoodie-catalog.yml using context.getEnv().getCachedFiles()
                 final Map<String, String> options = new HashMap<>();
+                options.put("hive_sync.support_timestamp","true");
+//                options.put("hoodie.datasource.hive_sync.support_timestamp","true");
                 options.put("hive_sync.enable", "true");
                 options.put("hive_sync.mode", "hms");
                 options.put("hive_sync.metastore.uris", "thrift://hz11-trino-arctic-0.jd.163.org:9083");
-//                options.put("hive_sync.skip_ro_suffix", "true");
-
                 options.put("hive_sync.db", hudiDb);
                 options.put("hive_sync.table", e.f0.getObjectName());
-                options.put("hive_sync.support_timestamp","true");
-                options.put("hoodie.datasource.hive_sync.support_timestamp","true");
+
 
                 options.put("table.type", "MERGE_ON_READ");
                 options.put("read.tasks", "8");
                 options.put("write.bucket_assign.tasks", "8");
                 options.put("write.tasks", "8");
                 options.put("write.batch.size", "128");
-//                options.put("write.log_block.size", "256");
-//                options.put("write.rate.limit", "10000");
-
+//                options.put("write.log_block.size", "1");
 //                options.put("compaction.async.enabled","false");
-//                options.put("compaction.schedule.enabled","false");
+//                options.put("compaction.schedule.enabled","true");
 //                options.put("clean.async.enabled","true");
-
 
                 options.put("compaction.tasks", "8");
                 options.put("compaction.trigger.strategy", "num_or_time");
-                options.put("compaction.delta_commits", "1");
-                options.put("compaction.delta_seconds", "60");
+                options.put("compaction.delta_commits", "3");
+                options.put("compaction.delta_seconds", "180");
+                options.put("compaction.max_memory", "1024");
                 options.put("hoodie.embed.timeline.server", "false");
 
-//                options.put("compaction.delta_seconds", "60");
 //                options.put("hoodie.clean.async", "true");
 //                options.put("hoodie.cleaner.parallelism", "2");
                 ObjectPath objectPath = new ObjectPath(hudiDb, e.f0.getObjectName());
@@ -190,7 +229,7 @@ public class SyncDbFunctionForDistrict implements Consumer<CallContext> {
         });
     }
 
-    private MySqlSource<RowData> getMySqlSource(final String[] srcCatalogDb, final MysqlCdcCatalog mysql, final Map<String, RowDataDebeziumDeserializeSchema> maps) {
+    private MySqlSource<RowData> getMySqlSource(final String[] srcCatalogDb, List<String> tableList, final MysqlCdcCatalog mysql, final Map<String, RowDataDebeziumDeserializeSchema> maps) {
 
         // TODO: extract hostname port from url
         return MySqlSource.<RowData>builder()
@@ -201,7 +240,7 @@ public class SyncDbFunctionForDistrict implements Consumer<CallContext> {
 //                .databaseList(srcCatalogDb)
                 .databaseList(srcCatalogDb[1])
 //                .tableList(".*")
-                .tableList(srcCatalogDb[1] + ".district")
+                .tableList(tableList.toArray(new String[tableList.size()]))
                 .deserializer(new CompositeDebeziuDeserializationSchema(maps))
                 .build();
     }
@@ -275,8 +314,7 @@ public class SyncDbFunctionForDistrict implements Consumer<CallContext> {
         @Override
         public void processElement(final RowData rowData, final ProcessFunction<RowData, Void>.Context ctx, final Collector<Void> out) throws Exception {
             final String key = rowData.getString(rowData.getArity() - 1).toString() + "." + rowData.getString(rowData.getArity() - 2).toString();
-            ctx.output(new OutputTag<Row>(key) {
-            }, this.converters.get(key).toExternal(rowData));
+            ctx.output(new OutputTag<RowData>(key),rowData);
         }
     }
 

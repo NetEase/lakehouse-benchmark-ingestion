@@ -1,4 +1,4 @@
-package com.netease.arctic.demo.function;
+package com.netease.arctic.demo.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

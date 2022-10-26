@@ -1,4 +1,4 @@
-package com.netease.arctic.demo;
+package com.netease.arctic.demo.test;
 
 import org.apache.beam.sdk.options.Default;
 import org.apache.flink.api.java.tuple.Tuple2;

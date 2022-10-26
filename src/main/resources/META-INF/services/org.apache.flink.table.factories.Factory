@@ -13,6 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-com.netease.arctic.demo.MysqlCdcCatalogFactory
+com.netease.arctic.demo.source.MysqlCdcCatalogFactory
 org.apache.hudi.table.catalog.HoodieCatalogFactory
 org.apache.hudi.table.HoodieTableFactory
