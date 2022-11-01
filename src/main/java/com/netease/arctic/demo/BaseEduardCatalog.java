@@ -10,6 +10,7 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ConfigOptions;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
@@ -42,6 +43,7 @@ public abstract class BaseEduardCatalog implements Consumer<CallContext> {
         StreamExecutionEnvironment env = context.getEnv();
         final StreamTableEnvironment tEnv = context.getTEnv();
         final Configuration configuration = tEnv.getConfig().getConfiguration();
+        env.setStateBackend(new FsStateBackend("file:/Users/yuekelei/develop/rocksdb-cp", true));
 
         // you can set configuration
         CatalogParam sourceCatalogParam = getSourceCatalogParam(configuration);
