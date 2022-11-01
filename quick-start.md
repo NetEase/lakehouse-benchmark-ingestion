@@ -1,5 +1,5 @@
 # 总览
-欢迎使用eduard，eduard是网易开源的数据湖性能基准测试data-lake-benchmark项目下的数据同步工具，该工具基于Flink-CDC实现，能够实现将数据库中的数据实时同步到数据湖的功能。
+欢迎使用eduard，eduard是网易开源的数据湖性能基准测试data-lake-benchmark项目下的数据同步工具，该工具基于Flink-CDC实现，能够将数据库中的数据实时同步到数据湖。
 
 ## 快速开始
 1. 下载项目代码 `git clone xxx`
