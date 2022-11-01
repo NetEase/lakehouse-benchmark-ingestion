@@ -1,4 +1,4 @@
-package com.netease.arctic.demo.test;
+package com.netease.arctic.demo.util;
 
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
@@ -7,16 +7,10 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.CatalogDatabaseImpl;
 import org.apache.flink.table.catalog.ObjectPath;
-import org.apache.flink.table.catalog.ResolvedCatalogTable;
 import org.apache.flink.table.catalog.exceptions.DatabaseAlreadyExistException;
-import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
-import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
 import org.apache.flink.table.catalog.exceptions.TableNotExistException;
 
-import javax.print.DocFlavor;
 import java.util.*;
-
-import static java.util.stream.Collectors.toList;
 
 public class RefreshTable {
     public static void main(String[] args) {
