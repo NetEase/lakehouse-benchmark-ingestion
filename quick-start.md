@@ -7,7 +7,7 @@
 3. 通过命令`mvn clean install -DskipTests `编译项目
 4. 在Flink目录下，新建userlib目录，并将eduard/target目录下的eduard-1.0-SNAPSHOT.jar拷贝至$FLINK_HOME/userlib下
 5. 进入Flink目录，通过`bin/start-cluster.sh`命令启动standalone模式下的Flink集群
-6. 通过`bin/flink run  --detached ./userlib/eduard-1.0-SNAPSHOT.jar`命令启动数据同步工具
+6. 通过`bin/flink run --detached ./userlib/eduard-1.0-SNAPSHOT.jar`命令启动数据同步工具
 7. 通过`localhost:8081`打开Flink Web UI，观察数据同步的情况
 
 ## 支持的参数
@@ -28,10 +28,10 @@
 
 ### Arctic相关
 
-| 参数项                        | 是否必须 | 默认值    | 描述                  |
-|----------------------------|------|--------|---------------------|
-| arctic.metastore.url       | 是    | (none) | Arctic数据库URL地址      |
-| arctic.optimize.group.name | 否    | (none) | Arctic Optimizer资源组 |
+| 参数项                        | 是否必须 | 默认值    | 描述                     |
+|----------------------------|------|--------|------------------------|
+| arctic.metastore.url       | 是    | (none) | Arctic metastore的URL地址 |
+| arctic.optimize.group.name | 否    | (none) | Arctic Optimizer资源组    |
  
 ### Iceberg相关
 
@@ -45,7 +45,7 @@
 
 | 参数项                              | 是否必须 | 默认值           | 描述                                   |
 |----------------------------------|------|---------------|--------------------------------------|
-| hudi.catalog.path                | 是    | (none)        | Hudi catalog的地址                      |
+| hudi.catalog.path                | 是    | (none)        | Hudi Catalog的地址                      |
 | hudi.table.type                  | 否    | MERGE_ON_READ | 表操作的类型，支持MERGE_ON_READ/COPY_ON_WRITE |
 | hudi.read.tasks                  | 否    | 2             | 读算子的并行度                              |
 | hudi.compaction.tasks            | 否    | 2             | 在线 compaction 的并行度                   |
