@@ -5,7 +5,7 @@
 1. 下载项目代码 `git clone xxx`
 2. 修改resource/eduard.yaml，填写配置项信息
 3. 通过命令`mvn clean install -DskipTests `编译项目
-4. 在Flink目录下，新建userlib目录，并将eduard/target目录下的eduard-1.0-SNAPSHOT.jar拷贝至$FLINK_HOME/userLib下
+4. 在Flink目录下，新建userlib目录，并将eduard/target目录下的eduard-1.0-SNAPSHOT.jar拷贝至$FLINK_HOME/userlib下
 5. 进入Flink目录，通过`bin/start-cluster.sh`命令启动standalone模式下的Flink集群
 6. 通过`bin/flink run  --detached ./userlib/eduard-1.0-SNAPSHOT.jar`命令启动数据同步工具
 7. 通过`localhost:8081`打开Flink Web UI，观察数据同步的情况
