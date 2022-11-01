@@ -1,5 +1,5 @@
-set table.exec.resource.default-parallelism=16;
--- set taskmanager.memory.process.size=10240m;
+--set table.exec.resource.default-parallelism=16;
+ set taskmanager.memory.process.size=10240m;
 
 set execution.checkpointing.externalized-checkpoint-retention=RETAIN_ON_CANCELLATION;
 set execution.checkpointing.interval=60s;

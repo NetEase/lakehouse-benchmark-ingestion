@@ -22,19 +22,18 @@
         <hadoop.version>3.1.4</hadoop.version>
         <commons-cli.version>1.3.1</commons-cli.version>
         <mysql-connector-java.version>8.0.27</mysql-connector-java.version>
-        <parquet-avro.version>1.11.1</parquet-avro.version>
+        <parquet-avro.version>1.12.0</parquet-avro.version>
         <hive-exec.version>2.3.1</hive-exec.version>
         <avro.version>1.10.0</avro.version>
         <slf4j-log4j12.version>1.7.30</slf4j-log4j12.version>
         <commons-compress.version>1.21</commons-compress.version>
-        <flink-connector-mysql-cdc.version>2.2.1</flink-connector-mysql-cdc.version>
+        <flink-connector-mysql-cdc.version>2.3-SNAPSHOT</flink-connector-mysql-cdc.version>
         <connect-json.version>2.7.0</connect-json.version>
         <jackson.version>2.13.0</jackson.version>
-        <kafka-connect.version>7.0.1</kafka-connect.version>
-        <iceberg.version>0.12.0</iceberg.version>
+        <iceberg.version>0.14.0</iceberg.version>
     </properties>
     <dependencies>
-        <!--sql client dependencies-->
+        <!--flink dependencies-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-clients_2.12</artifactId>
@@ -47,18 +46,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-parquet_2.12</artifactId>
-            <version>${flink.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
             <artifactId>flink-sql-client_2.12</artifactId>
-            <version>${flink.version}</version>
-            <!--            <scope>provided</scope>-->
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-python_2.12</artifactId>
             <version>${flink.version}</version>
         </dependency>
         <dependency>
@@ -76,23 +64,23 @@
             <artifactId>flink-statebackend-rocksdb_2.12</artifactId>
             <version>${flink.version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.apache.flink</groupId>-->
-<!--            <artifactId>flink-yarn_2.12</artifactId>-->
-<!--            <version>${flink.version}</version>-->
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <artifactId>javax.servlet</artifactId>-->
-<!--                    <groupId>servlet-api</groupId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-hive_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
         </dependency>
 
+        <!--iceberg dependencies-->
+        <dependency>
+            <groupId>org.apache.iceberg</groupId>
+            <artifactId>iceberg-flink-1.14</artifactId>
+            <version>${iceberg.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.iceberg</groupId>
+            <artifactId>iceberg-core</artifactId>
+            <version>${iceberg.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.iceberg</groupId>
             <artifactId>iceberg-api</artifactId>
@@ -104,44 +92,26 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-<!--        iceberg dependency-->
-        <dependency>
-            <groupId>org.apache.iceberg</groupId>
-            <artifactId>iceberg-core</artifactId>
-            <version>${iceberg.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.iceberg</groupId>
             <artifactId>iceberg-data</artifactId>
             <version>${iceberg.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.iceberg</groupId>
             <artifactId>iceberg-orc</artifactId>
             <version>${iceberg.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.iceberg</groupId>
             <artifactId>iceberg-common</artifactId>
             <version>${iceberg.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.iceberg</groupId>
             <artifactId>iceberg-parquet</artifactId>
             <version>${iceberg.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.iceberg</groupId>
-            <artifactId>iceberg-flink</artifactId>
-            <version>${iceberg.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.iceberg</groupId>
             <artifactId>iceberg-hive-metastore</artifactId>
@@ -191,53 +161,59 @@
             <artifactId>commons-compress</artifactId>
             <version>${commons-compress.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.hudi</groupId>
-            <artifactId>hudi-flink</artifactId>
-            <version>0.11.1</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>javax.servlet</artifactId>
-                    <groupId>servlet-api</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>flink-clients_2.12</artifactId>
-                    <groupId>org.apache.flink</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>avro</artifactId>
-                    <groupId>org.apache.avro</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>kafka-clients</artifactId>
-                    <groupId>org.apache.kafka</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>flink-connector-kafka_2.12</artifactId>
-                    <groupId>org.apache.flink</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>hbase-server</artifactId>
-                    <groupId>org.apache.hbase</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.hudi</groupId>-->
+<!--            <artifactId>hudi-flink</artifactId>-->
+<!--            <version>0.11.1</version>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <artifactId>javax.servlet</artifactId>-->
+<!--                    <groupId>servlet-api</groupId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <artifactId>flink-clients_2.12</artifactId>-->
+<!--                    <groupId>org.apache.flink</groupId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <artifactId>avro</artifactId>-->
+<!--                    <groupId>org.apache.avro</groupId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <artifactId>kafka-clients</artifactId>-->
+<!--                    <groupId>org.apache.kafka</groupId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <artifactId>flink-connector-kafka_2.12</artifactId>-->
+<!--                    <groupId>org.apache.flink</groupId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <artifactId>hbase-server</artifactId>-->
+<!--                    <groupId>org.apache.hbase</groupId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.esotericsoftware.kryo</groupId>
             <artifactId>kryo</artifactId>
             <version>2.24.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.parquet/parquet-column -->
         <dependency>
             <groupId>org.apache.parquet</groupId>
-            <artifactId>parquet-avro</artifactId>
-            <version>${parquet-avro.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>avro</artifactId>
-                    <groupId>org.apache.avro</groupId>
-                </exclusion>
-            </exclusions>
+            <artifactId>parquet-column</artifactId>
+            <version>1.12.3</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.parquet</groupId>-->
+<!--            <artifactId>parquet-avro</artifactId>-->
+<!--            <version>${parquet-avro.version}</version>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <artifactId>avro</artifactId>-->
+<!--                    <groupId>org.apache.avro</groupId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.ververica</groupId>
             <artifactId>flink-connector-mysql-cdc</artifactId>
@@ -274,22 +250,24 @@
             <artifactId>arctic-flink-runtime-1.14</artifactId>
             <version>0.3.2-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.hudi</groupId>
+            <artifactId>hudi-flink1.14-bundle_2.12</artifactId>
+            <version>0.11.1</version>
+        </dependency>
 <!--        <dependency>-->
-<!--            <groupId>org.apache.hudi</groupId>-->
-<!--            <artifactId>hudi-flink-bundle_2.11</artifactId>-->
-<!--            <version>0.11.1</version>-->
+<!--            <groupId>org.apache.flink</groupId>-->
+<!--            <artifactId>flink-shaded-guava</artifactId>-->
+<!--            <version>18.0-13.0</version>-->
 <!--        </dependency>-->
-<!--        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-shaded-guava</artifactId>
-            <version>18.0-13.0</version>
-        </dependency>-->
 <!--        <dependency>-->
 <!--            <groupId>org.apache.flink</groupId>-->
 <!--            <artifactId>flink-shaded-guava</artifactId>-->
 <!--            <version>30.1.1-jre-14.0</version>-->
 <!--            <scope>compile</scope>-->
 <!--        </dependency>-->
+
+
 
 
 <!--        <dependency>-->

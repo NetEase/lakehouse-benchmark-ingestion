@@ -1,7 +1,5 @@
 package com.netease.arctic.demo.test;
 
-import org.apache.beam.sdk.options.Default;
-import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -25,7 +23,7 @@ public class RefreshTable {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         CheckpointConfig checkpointConfig = env.getCheckpointConfig();
         checkpointConfig.setCheckpointInterval(15000);
-        env.setParallelism(8);
+//        env.setParallelism(8);
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
         Configuration configuration = tableEnv.getConfig().getConfiguration();
         configuration.setString("table.dynamic-table-options.enabled", "true");

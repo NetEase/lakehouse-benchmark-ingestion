@@ -80,8 +80,8 @@ public class SyncDbFunction {
                 .password(mysql.getPassword())
 //                .databaseList(srcCatalogDb)
                 .databaseList(srcCatalogDb)
-//                .tableList(".*")
-                .tableList(tableList.toArray(new String[tableList.size()]))
+                .tableList(".*")
+//                .tableList(tableList.toArray(new String[tableList.size()]))
                 .deserializer(new CompositeDebeziuDeserializationSchema(maps))
                 .build();
     }

@@ -1,4 +1,4 @@
-set table.exec.resource.default-parallelism=2;
+--set table.exec.resource.default-parallelism=16;
 -- set taskmanager.memory.process.size=10240m;
 
 set execution.checkpointing.externalized-checkpoint-retention=RETAIN_ON_CANCELLATION;
@@ -15,7 +15,7 @@ set execution.checkpointing.tolerable-failed-checkpoints=100;
 -- set state.backend.incremental=true;
 -- SET 'execution.checkpoint.path' = '/Users/yuekelei/Documents/workspace';
 
-CREATE CATALOG mysql WITH(
+CREATE CATALOG mysql_catalog WITH(
     'type' = 'mysql-cdc',
     'default-database' = 'test2w',
     'username' = 'rds',
@@ -24,12 +24,15 @@ CREATE CATALOG mysql WITH(
     'port'='3332'
 );
 
-CREATE CATALOG hudi WITH(
-    'type' = 'hudi',
-    'default-database' = 'hudi_test_2w',
-    'catalog.path' = 'hdfs://hz11-trino-arctic-0.jd.163.org:8020/user/warehouse'
+CREATE CATALOG iceberg_catalog WITH(
+    'type' = 'iceberg',
+    'catalog-type' = 'hive',
+    'uri'='thrift://hz11-trino-arctic-0.jd.163.org:9083',
+    'property-version' = '1',
+    'warehouse' = 'hdfs://hz11-trino-arctic-0.jd.163.org:8020/user/warehouse',
+    'clients' = '5'
 );
 
-set custom.sync-db.source.db=mysql.test2w;
-set custom.sync-db.dest.db=hudi.hudi_test_2w;
-call com.netease.arctic.demo.sink.HudiCatalogSync;
+set custom.sync-db.source.db=mysql_catalog.test2w;
+set custom.sync-db.dest.db=iceberg_catalog.test2w_iceberg8;
+call com.netease.arctic.demo.sink.IcebergCatalogSync;

@@ -14,5 +14,6 @@
 # limitations under the License.
 
 com.netease.arctic.demo.source.MysqlCdcCatalogFactory
-org.apache.hudi.table.catalog.HoodieCatalogFactory
-org.apache.hudi.table.HoodieTableFactory
+#org.apache.iceberg.flink.FlinkDynamicTableFactory
+#org.apache.hudi.table.catalog.HoodieCatalogFactory
+#org.apache.hudi.table.HoodieTableFactory

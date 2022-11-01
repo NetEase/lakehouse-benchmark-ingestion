@@ -16,6 +16,7 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.ObjectPath;
 import org.apache.flink.table.catalog.ResolvedCatalogTable;
+import org.apache.flink.table.catalog.exceptions.DatabaseAlreadyExistException;
 import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
 import org.apache.flink.table.data.RowData;
 import org.apache.log4j.Logger;
@@ -57,7 +58,11 @@ public abstract class BaseEduardCatalog implements Consumer<CallContext> {
             throw new RuntimeException(e);
         }
         List<Tuple2<ObjectPath, ResolvedCatalogTable>> s = pathAndTable.stream().collect(toList());
-        createTable(destCatalog, destCatalogParam.getDataBaseName(), s);
+        try {
+            createTable(destCatalog, destCatalogParam.getDataBaseName(), s);
+        } catch (DatabaseAlreadyExistException e) {
+            throw new RuntimeException(e);
+        }
 
         final MySqlSource<RowData> source;
         try {
@@ -94,11 +99,11 @@ public abstract class BaseEduardCatalog implements Consumer<CallContext> {
 
     private SingleOutputStreamOperator<Void> sideOutputHandler(StreamExecutionEnvironment env, MySqlSource<RowData> source, List<Tuple2<ObjectPath, ResolvedCatalogTable>> s) {
         return env
-            .fromSource(source, WatermarkStrategy.noWatermarks(), "mysql").uid("mysql").setParallelism(8)
-            .process(new RowDataVoidProcessFunction(getConverters(s))).uid("split stream").name("split stream").setParallelism(8);
+            .fromSource(source, WatermarkStrategy.noWatermarks(), "mysql").uid("mysql").setParallelism(2)
+            .process(new RowDataVoidProcessFunction(getConverters(s))).uid("split stream").name("split stream").setParallelism(2);
     }
 
-    public abstract void createTable(Catalog catalog, String dbName, List<Tuple2<ObjectPath, ResolvedCatalogTable>> pathAndTable);
+    public abstract void createTable(Catalog catalog, String dbName, List<Tuple2<ObjectPath, ResolvedCatalogTable>> pathAndTable) throws DatabaseAlreadyExistException;
 
     public abstract void insertData(StreamTableEnvironment tEnv, SingleOutputStreamOperator<Void> process, CatalogParam sourceCatalogParam, CatalogParam destCatalogParam, List<Tuple2<ObjectPath, ResolvedCatalogTable>> s);
 

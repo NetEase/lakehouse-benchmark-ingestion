@@ -38,25 +38,23 @@ public class HudiCatalogSync extends BaseEduardCatalog {
                 // TODO: read external options hoodie-catalog.yml using context.getEnv().getCachedFiles()
                 final Map<String, String> options = new HashMap<>();
                 options.put("hive_sync.support_timestamp","true");
-//                options.put("hoodie.datasource.hive_sync.support_timestamp","true");
                 options.put("hive_sync.enable", "true");
                 options.put("hive_sync.mode", "hms");
                 options.put("hive_sync.metastore.uris", "thrift://hz11-trino-arctic-0.jd.163.org:9083");
                 options.put("hive_sync.db", dbName);
                 options.put("hive_sync.table", e.f0.getObjectName());
 
-
                 options.put("table.type", "MERGE_ON_READ");
-                options.put("read.tasks", "8");
-                options.put("write.bucket_assign.tasks", "8");
-                options.put("write.tasks", "8");
+                options.put("read.tasks", "2");
+                options.put("write.bucket_assign.tasks", "2");
+                options.put("write.tasks", "2");
                 options.put("write.batch.size", "128");
 //                options.put("write.log_block.size", "1");
 //                options.put("compaction.async.enabled","false");
 //                options.put("compaction.schedule.enabled","true");
 //                options.put("clean.async.enabled","true");
 
-                options.put("compaction.tasks", "8");
+                options.put("compaction.tasks", "2");
                 options.put("compaction.trigger.strategy", "num_or_time");
                 options.put("compaction.delta_commits", "3");
                 options.put("compaction.delta_seconds", "180");
