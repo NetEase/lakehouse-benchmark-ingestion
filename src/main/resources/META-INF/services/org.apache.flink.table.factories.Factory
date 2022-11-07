@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-com.netease.arctic.demo.source.MysqlCdcCatalogFactory
+com.netease.arctic.benchmark.ingestion.source.MysqlCdcCatalogFactory
 #org.apache.iceberg.flink.FlinkDynamicTableFactory
 #org.apache.hudi.table.catalog.HoodieCatalogFactory
 #org.apache.hudi.table.HoodieTableFactory
