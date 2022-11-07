@@ -18,9 +18,9 @@
 package com.netease.arctic.benchmark.ingestion;
 
 import com.netease.arctic.benchmark.ingestion.SyncDbFunction.RowDataVoidProcessFunction;
-import com.netease.arctic.benchmark.ingestion.parameters.CallContext;
-import com.netease.arctic.benchmark.ingestion.parameters.catalog.CatalogParams;
-import com.netease.arctic.benchmark.ingestion.parameters.BaseParameters;
+import com.netease.arctic.benchmark.ingestion.params.CallContext;
+import com.netease.arctic.benchmark.ingestion.params.catalog.CatalogParams;
+import com.netease.arctic.benchmark.ingestion.params.BaseParameters;
 import com.netease.arctic.benchmark.ingestion.source.MysqlCdcCatalog;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;

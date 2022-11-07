@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.netease.arctic.benchmark.ingestion.parameters;
+package com.netease.arctic.benchmark.ingestion.params;
 
 import com.netease.arctic.benchmark.ingestion.config.BaseConfigOptions;
 import org.apache.flink.configuration.Configuration;

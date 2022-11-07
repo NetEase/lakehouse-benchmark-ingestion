@@ -17,7 +17,7 @@
 
 package com.netease.arctic.benchmark.ingestion;
 
-import com.netease.arctic.benchmark.ingestion.parameters.database.SyncDbParams;
+import com.netease.arctic.benchmark.ingestion.params.database.SyncDbParams;
 import com.netease.arctic.benchmark.ingestion.source.MysqlCdcCatalog;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.ververica.cdc.connectors.mysql.table.MySqlDeserializationConverterFactory;

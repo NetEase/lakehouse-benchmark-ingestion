@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.netease.arctic.benchmark.ingestion.parameters.catalog;
+package com.netease.arctic.benchmark.ingestion.params.catalog;
 
 import com.netease.arctic.benchmark.ingestion.config.HudiConfigOptions;
 import org.apache.flink.configuration.Configuration;

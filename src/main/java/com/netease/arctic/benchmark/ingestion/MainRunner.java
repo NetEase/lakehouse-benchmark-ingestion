@@ -18,9 +18,9 @@
 package com.netease.arctic.benchmark.ingestion;
 
 import com.netease.arctic.benchmark.ingestion.config.CatalogConfigUtil;
-import com.netease.arctic.benchmark.ingestion.parameters.CallContext;
-import com.netease.arctic.benchmark.ingestion.parameters.BaseParameters;
-import com.netease.arctic.benchmark.ingestion.parameters.ParameterUtil;
+import com.netease.arctic.benchmark.ingestion.params.CallContext;
+import com.netease.arctic.benchmark.ingestion.params.BaseParameters;
+import com.netease.arctic.benchmark.ingestion.params.ParameterUtil;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.IllegalConfigurationException;

@@ -18,8 +18,8 @@
 package com.netease.arctic.benchmark.ingestion.sink;
 
 import com.netease.arctic.benchmark.ingestion.BaseCatalogSync;
-import com.netease.arctic.benchmark.ingestion.parameters.catalog.ArcticParameters;
-import com.netease.arctic.benchmark.ingestion.parameters.BaseParameters;
+import com.netease.arctic.benchmark.ingestion.params.catalog.ArcticParameters;
+import com.netease.arctic.benchmark.ingestion.params.BaseParameters;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.CatalogDatabaseImpl;

@@ -15,8 +15,11 @@
  * limitations under the License.
  */
 
-package com.netease.arctic.benchmark.ingestion.parameters.catalog;
+package com.netease.arctic.benchmark.ingestion.params;
 
+import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,8 +29,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CatalogParams {
-
-  String catalogName;
-  String dataBaseName;
+public class CallContext {
+  private StreamExecutionEnvironment env;
+  private StreamTableEnvironment tableEnv;
+  private ParameterTool args;
 }

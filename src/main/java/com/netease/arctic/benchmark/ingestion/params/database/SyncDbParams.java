@@ -15,21 +15,28 @@
  * limitations under the License.
  */
 
-package com.netease.arctic.benchmark.ingestion.parameters.catalog;
+package com.netease.arctic.benchmark.ingestion.params.database;
 
-import com.netease.arctic.benchmark.ingestion.config.ArcticConfigOptions;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.util.Preconditions;
+import org.apache.flink.table.api.Schema;
+import org.apache.flink.table.catalog.ObjectPath;
+import org.apache.flink.types.Row;
+import org.apache.flink.util.OutputTag;
+import java.io.Serializable;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public class ArcticParameters {
-
-  protected final Configuration eduardConfig;
-
-  public ArcticParameters(Configuration eduardConfig) {
-    this.eduardConfig = Preconditions.checkNotNull(eduardConfig);
-  }
-
-  public String getOptimizeGroupName() {
-    return eduardConfig.getString(ArcticConfigOptions.ARCTIC_OPTIMIZE_GROUP_NAME);
-  }
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class SyncDbParams implements Serializable {
+  Schema schema;
+  OutputTag<Row> tag;
+  String db;
+  String table;
+  ObjectPath path;
+  List<String> primaryKeys;
 }
