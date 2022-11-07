@@ -18,12 +18,12 @@
 package com.netease.arctic.benchmark.ingestion;
 
 import com.netease.arctic.benchmark.ingestion.config.CatalogConfigUtil;
-import com.netease.arctic.benchmark.ingestion.params.CallContext;
 import com.netease.arctic.benchmark.ingestion.params.BaseParameters;
+import com.netease.arctic.benchmark.ingestion.params.CallContext;
 import com.netease.arctic.benchmark.ingestion.params.ParameterUtil;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.configuration.IllegalConfigurationException;
+import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.api.bridge.java.internal.StreamTableEnvironmentImpl;
@@ -32,36 +32,36 @@ import org.apache.flink.table.operations.ddl.CreateCatalogOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class MainRunner {
+
   private static final Logger LOG = LoggerFactory.getLogger(MainRunner.class);
   private static StreamExecutionEnvironment env;
   private static StreamTableEnvironment tableEnv;
-  public static final String EDUARD_CONF_FILENAME = "eduard-conf.yaml";
+  public static final String EDUARD_CONF_FILENAME = "conf/eduard-conf.yaml";
 
   public static void main(String[] args)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     Class.forName("com.mysql.jdbc.Driver");
     System.setProperty("HADOOP_USER_NAME", "sloth");
 
-    String confDir = Objects.requireNonNull(MainRunner.class.getResource("/")).getPath();
     Map<String, String> props = new HashMap<>();
-    Configuration configuration = loadConfiguration(confDir, props);
+    Configuration configuration = loadYAMLResource(
+        MainRunner.class.getClassLoader().getResourceAsStream(EDUARD_CONF_FILENAME),
+        props);
     BaseParameters baseParameters = new BaseParameters(configuration);
 
-    env = StreamExecutionEnvironment.getExecutionEnvironment();
+    env = StreamExecutionEnvironment.getExecutionEnvironment(setFlinkConf());
     tableEnv = StreamTableEnvironment.create(env);
     createSourceCatalog(baseParameters.getSourceType(), baseParameters);
     createSinkCatalog(baseParameters.getSinkType(), props);
@@ -115,38 +115,11 @@ public class MainRunner {
     ((StreamTableEnvironmentImpl) tableEnv).executeInternal(operation);
   }
 
-  private static Configuration loadConfiguration(final String configDir,
+  private static Configuration loadYAMLResource(InputStream inputStream,
       Map<String, String> props) {
-    if (configDir == null) {
-      throw new IllegalArgumentException(
-          "Given configuration directory is null, cannot load configuration");
-    }
-
-    final File confDirFile = new File(configDir);
-    if (!(confDirFile.exists())) {
-      throw new IllegalConfigurationException(
-          "The given configuration directory name '" + configDir + "' (" +
-              confDirFile.getAbsolutePath() + ") does not describe an existing directory.");
-    }
-
-    // get Flink yaml configuration file
-    final File yamlConfigFile = new File(confDirFile, EDUARD_CONF_FILENAME);
-
-    if (!yamlConfigFile.exists()) {
-      throw new IllegalConfigurationException("The Flink config file '" + yamlConfigFile + "' (" +
-          confDirFile.getAbsolutePath() + ") does not exist.");
-    }
-
-    Configuration configuration = loadYAMLResource(yamlConfigFile, props);
-
-    return configuration;
-  }
-
-  private static Configuration loadYAMLResource(File file, Map<String, String> props) {
     final Configuration config = new Configuration();
 
-    try (BufferedReader reader =
-        new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
       String line;
       int lineNo = 0;
@@ -162,8 +135,8 @@ public class MainRunner {
 
           // skip line with no valid key-value pair
           if (kv.length == 1) {
-            LOG.warn("Error while trying to split key and value in configuration file " + file +
-                ":" + lineNo + ": \"" + line + "\"");
+            LOG.warn("Error while trying to split key and value in configuration file " +
+                EDUARD_CONF_FILENAME + ":" + lineNo + ": \"" + line + "\"");
             continue;
           }
 
@@ -172,8 +145,8 @@ public class MainRunner {
 
           // sanity check
           if (key.length() == 0 || value.length() == 0) {
-            LOG.warn("Error after splitting key and value in configuration file " + file + ":" +
-                lineNo + ": \"" + line + "\"");
+            LOG.warn("Error after splitting key and value in configuration file " +
+                EDUARD_CONF_FILENAME + ":" + lineNo + ": \"" + line + "\"");
             continue;
           }
 
@@ -199,4 +172,9 @@ public class MainRunner {
     sourceProps.put("port", baseParameters.getSourcePort());
   }
 
+  private static Configuration setFlinkConf() {
+    Configuration configuration = new Configuration();
+    configuration.setInteger(RestOptions.PORT, 8081);
+    return configuration;
+  }
 }
