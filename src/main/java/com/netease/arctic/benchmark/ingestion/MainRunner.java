@@ -57,8 +57,7 @@ public class MainRunner {
 
     Map<String, String> props = new HashMap<>();
     Configuration configuration = loadYAMLResource(
-        MainRunner.class.getClassLoader().getResourceAsStream(EDUARD_CONF_FILENAME),
-        props);
+        MainRunner.class.getClassLoader().getResourceAsStream(EDUARD_CONF_FILENAME), props);
     BaseParameters baseParameters = new BaseParameters(configuration);
 
     env = StreamExecutionEnvironment.getExecutionEnvironment(setFlinkConf());
