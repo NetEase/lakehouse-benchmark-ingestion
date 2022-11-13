@@ -18,8 +18,8 @@
 package com.netease.arctic.benchmark.ingestion.sink;
 
 import com.netease.arctic.benchmark.ingestion.BaseCatalogSync;
-import com.netease.arctic.benchmark.ingestion.params.BaseParameters;
-import com.netease.arctic.benchmark.ingestion.params.catalog.HudiParameters;
+import com.netease.arctic.benchmark.ingestion.params.database.BaseParameters;
+import com.netease.arctic.benchmark.ingestion.params.table.HudiParameters;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.CatalogDatabaseImpl;
@@ -33,6 +33,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Hudi synchronize implementation of {@link BaseCatalogSync}，which customised operations for
+ * building tables
+ */
 public class HudiCatalogSync extends BaseCatalogSync {
 
   private final HudiParameters hudiParameters;
@@ -55,12 +59,15 @@ public class HudiCatalogSync extends BaseCatalogSync {
     }
 
     final String HIVE_META_STORE_URI = hudiParameters.getHiveMetastoreUri();
+    boolean is_hive_sync = hudiParameters.getHiveSyncEnable();
     final Map<String, String> options = new HashMap<>();
-    options.put("hive_sync.metastore.uris", HIVE_META_STORE_URI);
+    if (is_hive_sync) {
+      options.put("hive_sync.metastore.uris", HIVE_META_STORE_URI);
+    }
 
     pathAndTable.forEach(e -> {
       try {
-        fillHudiTableOptions(options, dbName, e.f0.getObjectName());
+        fillHudiTableOptions(options, is_hive_sync, dbName, e.f0.getObjectName());
         ObjectPath objectPath = new ObjectPath(dbName, e.f0.getObjectName());
 
         if (hudi.tableExists(objectPath)) {
@@ -78,13 +85,17 @@ public class HudiCatalogSync extends BaseCatalogSync {
     });
   }
 
-  private void fillHudiTableOptions(Map<String, String> options, String dbName, String tableName) {
-    options.put("hive_sync.enable", "true");
-    options.put("hive_sync.mode", "hms");
-    options.put("hive_sync.db", dbName);
-    options.put("hive_sync.table", tableName);
-    options.put("hive_sync.support_timestamp", "true");
+  private void fillHudiTableOptions(Map<String, String> options, boolean is_hive_sync,
+      String dbName, String tableName) {
+    if (is_hive_sync) {
+      options.put("hive_sync.enable", "true");
+      options.put("hive_sync.mode", "hms");
+      options.put("hive_sync.db", dbName);
+      options.put("hive_sync.table", tableName);
+      options.put("hive_sync.support_timestamp", "true");
+    }
 
+    options.put("compaction.async.enabled", "false");
     options.put("table.type", hudiParameters.getTableType());
     options.put("read.tasks", hudiParameters.getReadTasks() + "");
     options.put("write.tasks", hudiParameters.getWriteTasks() + "");

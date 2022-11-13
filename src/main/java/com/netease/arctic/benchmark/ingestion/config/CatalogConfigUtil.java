@@ -17,13 +17,27 @@
 
 package com.netease.arctic.benchmark.ingestion.config;
 
+import com.netease.arctic.benchmark.ingestion.params.database.BaseParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Map;
 
+/**
+ * An util class of catalog config properties manager
+ */
 public class CatalogConfigUtil {
 
   private static final Logger LOG = LoggerFactory.getLogger(CatalogConfigUtil.class);
+
+  public static void getSourceCatalogProps(BaseParameters baseParameters,
+      Map<String, String> sourceProps) {
+    sourceProps.put("type", "mysql-cdc");
+    sourceProps.put("default-database", baseParameters.getSourceDatabaseName());
+    sourceProps.put("username", baseParameters.getSourceUserName());
+    sourceProps.put("password", baseParameters.getSourcePassword());
+    sourceProps.put("hostname", baseParameters.getSourceHostName());
+    sourceProps.put("port", baseParameters.getSourcePort());
+  }
 
   public static void getSinkCatalogProps(String sinkType, Map<String, String> sinkProps) {
     switch (sinkType) {

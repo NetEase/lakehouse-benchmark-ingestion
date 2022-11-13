@@ -15,22 +15,38 @@
  * limitations under the License.
  */
 
-package com.netease.arctic.benchmark.ingestion.params;
+package com.netease.arctic.benchmark.ingestion.params.database;
 
 import com.netease.arctic.benchmark.ingestion.config.BaseConfigOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Preconditions;
 
+/**
+ * A utility class helps parse and manage database parameters about source-side database and
+ * target-side database
+ */
 public class BaseParameters {
 
   protected final Configuration eduardConfig;
+  protected final String sinkType;
+  protected final String sinkDatabase;
 
-  public BaseParameters(Configuration eduardConfig) {
+  public BaseParameters(Configuration eduardConfig, String sinkType, String sinkDatabase) {
     this.eduardConfig = Preconditions.checkNotNull(eduardConfig);
+    this.sinkType = sinkType;
+    this.sinkDatabase = sinkDatabase;
   }
 
   public Configuration getEduardConfig() {
     return eduardConfig;
+  }
+
+  public String getSinkType() {
+    return sinkType;
+  }
+
+  public String getSinkDatabase() {
+    return sinkDatabase;
   }
 
   public String getSourceType() {
@@ -67,14 +83,6 @@ public class BaseParameters {
 
   public int getSourceParallelism() {
     return eduardConfig.getInteger(BaseConfigOptions.SOURCE_PARALLELISM);
-  }
-
-  public String getSinkType() {
-    return eduardConfig.getString(BaseConfigOptions.SINK_TYPE);
-  }
-
-  public String getSinkDatabaseName() {
-    return eduardConfig.getString(BaseConfigOptions.SINK_DATABASE_NAME);
   }
 
   public int getSinkParallelism() {

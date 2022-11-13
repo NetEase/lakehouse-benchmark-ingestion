@@ -17,9 +17,9 @@
 
 package com.netease.arctic.benchmark.ingestion.params;
 
-import com.netease.arctic.benchmark.ingestion.params.catalog.ArcticParameters;
-import com.netease.arctic.benchmark.ingestion.params.catalog.HudiParameters;
-import com.netease.arctic.benchmark.ingestion.params.catalog.IcebergParameters;
+import com.netease.arctic.benchmark.ingestion.params.table.ArcticParameters;
+import com.netease.arctic.benchmark.ingestion.params.table.HudiParameters;
+import com.netease.arctic.benchmark.ingestion.params.table.IcebergParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

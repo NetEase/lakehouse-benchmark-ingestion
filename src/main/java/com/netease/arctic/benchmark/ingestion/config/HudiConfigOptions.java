@@ -24,21 +24,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * {@link ConfigOption}s for {@link com.netease.arctic.benchmark.ingestion.sink.HudiCatalogSync}.
+ */
 public class HudiConfigOptions {
 
   public static final String TYPE = "hudi";
   public static final ConfigOption<String> HUDI_CATALOG_PATH =
       ConfigOptions.key("hudi.catalog.path").stringType().noDefaultValue();
+  public static final ConfigOption<Boolean> HUDI_HIVE_SYNC_ENABLE =
+      ConfigOptions.key("hudi.hive_sync.enable").booleanType().defaultValue(true);
   public static final ConfigOption<String> HUDI_HIVE_METASTORE_URL =
       ConfigOptions.key("hudi.hive_sync.metastore.uris").stringType().noDefaultValue();
   public static final ConfigOption<String> HUDI_TABLE_TYPE =
       ConfigOptions.key("hudi.table.type").stringType().defaultValue("MERGE_ON_READ");
   public static final ConfigOption<Integer> HUDI_READ_TASKS =
-      ConfigOptions.key("hudi.read.tasks").intType().defaultValue(2);
+      ConfigOptions.key("hudi.read.tasks").intType().defaultValue(4);
   public static final ConfigOption<Integer> HUDI_WRITE_TASKS =
-      ConfigOptions.key("hudi.write.tasks").intType().defaultValue(2);
+      ConfigOptions.key("hudi.write.tasks").intType().defaultValue(4);
   public static final ConfigOption<Integer> HUDI_COMPACTION_TASKS =
-      ConfigOptions.key("hudi.compaction.tasks").intType().defaultValue(2);
+      ConfigOptions.key("hudi.compaction.tasks").intType().defaultValue(4);
   public static final ConfigOption<String> HUDI_COMPACTION_TRIGGER_STRATEGY = ConfigOptions
       .key("hudi.compaction.trigger.strategy").stringType().defaultValue("num_or_time");
 

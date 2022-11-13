@@ -18,8 +18,8 @@
 package com.netease.arctic.benchmark.ingestion.sink;
 
 import com.netease.arctic.benchmark.ingestion.BaseCatalogSync;
-import com.netease.arctic.benchmark.ingestion.params.BaseParameters;
-import com.netease.arctic.benchmark.ingestion.params.catalog.IcebergParameters;
+import com.netease.arctic.benchmark.ingestion.params.database.BaseParameters;
+import com.netease.arctic.benchmark.ingestion.params.table.IcebergParameters;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.CatalogDatabaseImpl;
@@ -33,6 +33,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Iceberg synchronize implementation of {@link BaseCatalogSync}，which customised operations for
+ * building tables
+ */
 public class IcebergCatalogSync extends BaseCatalogSync {
 
   private final IcebergParameters icebergParameters;
@@ -58,6 +62,7 @@ public class IcebergCatalogSync extends BaseCatalogSync {
     pathAndTable.forEach(e -> {
       try {
         final Map<String, String> options = new HashMap<>();
+        fillIcebergTableOptions(options);
         ObjectPath objectPath = new ObjectPath(dbName, e.f0.getObjectName());
 
         if (iceberg.tableExists(objectPath) ||
@@ -74,5 +79,9 @@ public class IcebergCatalogSync extends BaseCatalogSync {
         throw new RuntimeException(ex);
       }
     });
+  }
+
+  private void fillIcebergTableOptions(Map<String, String> options) {
+    options.put("format-version", "2");
   }
 }

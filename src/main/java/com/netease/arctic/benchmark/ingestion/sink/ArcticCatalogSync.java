@@ -18,8 +18,8 @@
 package com.netease.arctic.benchmark.ingestion.sink;
 
 import com.netease.arctic.benchmark.ingestion.BaseCatalogSync;
-import com.netease.arctic.benchmark.ingestion.params.catalog.ArcticParameters;
-import com.netease.arctic.benchmark.ingestion.params.BaseParameters;
+import com.netease.arctic.benchmark.ingestion.params.table.ArcticParameters;
+import com.netease.arctic.benchmark.ingestion.params.database.BaseParameters;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.CatalogDatabaseImpl;
@@ -33,6 +33,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Arctic synchronize implementation of {@link BaseCatalogSync}, which customised operations for
+ * building tables
+ */
 public class ArcticCatalogSync extends BaseCatalogSync {
 
   private final ArcticParameters arcticParameters;

@@ -32,7 +32,9 @@ import static com.ververica.cdc.connectors.mysql.source.config.MySqlSourceOption
 import static org.apache.flink.connector.jdbc.catalog.factory.JdbcCatalogFactoryOptions.DEFAULT_DATABASE;
 import static org.apache.flink.table.factories.FactoryUtil.PROPERTY_VERSION;
 
-/** Factory for {@link MysqlCdcCatalog}. */
+/**
+ * Factory for {@link MysqlCdcCatalog}.
+ */
 public class MysqlCdcCatalogFactory implements CatalogFactory {
 
   private static final Logger LOG = LoggerFactory.getLogger(MysqlCdcCatalogFactory.class);

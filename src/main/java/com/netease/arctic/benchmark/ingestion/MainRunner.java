@@ -18,9 +18,15 @@
 package com.netease.arctic.benchmark.ingestion;
 
 import com.netease.arctic.benchmark.ingestion.config.CatalogConfigUtil;
-import com.netease.arctic.benchmark.ingestion.params.BaseParameters;
+import com.netease.arctic.benchmark.ingestion.params.database.BaseParameters;
 import com.netease.arctic.benchmark.ingestion.params.CallContext;
 import com.netease.arctic.benchmark.ingestion.params.ParameterUtil;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestOptions;
@@ -42,13 +48,16 @@ import java.util.Map;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Start-up class
+ */
 @Slf4j
 public class MainRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(MainRunner.class);
   private static StreamExecutionEnvironment env;
   private static StreamTableEnvironment tableEnv;
-  public static final String EDUARD_CONF_FILENAME = "conf/eduard-conf.yaml";
+  public static final String EDUARD_CONF_FILENAME = "conf/ingestion-conf.yaml";
 
   public static void main(String[] args)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException {
@@ -58,21 +67,26 @@ public class MainRunner {
     Map<String, String> props = new HashMap<>();
     Configuration configuration = loadYAMLResource(
         MainRunner.class.getClassLoader().getResourceAsStream(EDUARD_CONF_FILENAME), props);
-    BaseParameters baseParameters = new BaseParameters(configuration);
+    String[] params = parseParams(args);
+    String sinkType = params[0];
+    String sinkDatabase = params[1];
+    BaseParameters baseParameters = new BaseParameters(configuration, sinkType, sinkDatabase);
 
     env = StreamExecutionEnvironment.getExecutionEnvironment(setFlinkConf());
+    env.getCheckpointConfig().setCheckpointInterval(60 * 1000L);
     tableEnv = StreamTableEnvironment.create(env);
     createSourceCatalog(baseParameters.getSourceType(), baseParameters);
-    createSinkCatalog(baseParameters.getSinkType(), props);
-    call(baseParameters.getSinkType(), configuration, CallContext.builder()
+    createSinkCatalog(sinkType, props);
+    call(sinkType, sinkDatabase, configuration, CallContext.builder()
         .args(ParameterTool.fromArgs(args)).env(env).tableEnv(tableEnv).build());
   }
 
-  private static void call(String sinkType, Configuration configuration, final CallContext context)
+  private static void call(String sinkType, String sinkDatabase, Configuration configuration,
+      final CallContext context)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     final String prefix = "com.netease.arctic.benchmark.ingestion.sink.";
     final String suffix = "CatalogSync";
-    Class<?> classz = Class.forName(prefix + sinkType + suffix);
+    Class<?> classz = Class.forName(prefix + toUpperFirstCase(sinkType) + suffix);
     sinkType = sinkType.toLowerCase();
     Constructor<?> constructor;
     try {
@@ -82,7 +96,8 @@ public class MainRunner {
       throw new RuntimeException(e);
     }
     try {
-      ((Consumer<CallContext>) constructor.newInstance(new BaseParameters(configuration),
+      ((Consumer<CallContext>) constructor.newInstance(
+          new BaseParameters(configuration, sinkType, sinkDatabase),
           ParameterUtil.getParamsClass(sinkType).getConstructor(Configuration.class)
               .newInstance(configuration))).accept(context);
     } catch (InvocationTargetException | NoSuchMethodException e) {
@@ -95,7 +110,7 @@ public class MainRunner {
     String prefix = "source." + sourceType;
     String catalogName = sourceType + "_catalog";
     Map<String, String> sourceProps = new HashMap<>();
-    getSourceCatalogProps(baseParameters, sourceProps);
+    CatalogConfigUtil.getSourceCatalogProps(baseParameters, sourceProps);
     Operation operation = new CreateCatalogOperation(catalogName, sourceProps);
     ((StreamTableEnvironmentImpl) tableEnv).executeInternal(operation);
   }
@@ -124,15 +139,12 @@ public class MainRunner {
       int lineNo = 0;
       while ((line = reader.readLine()) != null) {
         lineNo++;
-        // 1. check for comments
         String[] comments = line.split("#", 2);
         String conf = comments[0].trim();
 
-        // 2. get key and value
         if (conf.length() > 0) {
           String[] kv = conf.split(": ", 2);
 
-          // skip line with no valid key-value pair
           if (kv.length == 1) {
             LOG.warn("Error while trying to split key and value in configuration file " +
                 EDUARD_CONF_FILENAME + ":" + lineNo + ": \"" + line + "\"");
@@ -142,7 +154,6 @@ public class MainRunner {
           String key = kv[0].trim();
           String value = kv[1].trim();
 
-          // sanity check
           if (key.length() == 0 || value.length() == 0) {
             LOG.warn("Error after splitting key and value in configuration file " +
                 EDUARD_CONF_FILENAME + ":" + lineNo + ": \"" + line + "\"");
@@ -161,19 +172,45 @@ public class MainRunner {
     return config;
   }
 
-  private static void getSourceCatalogProps(BaseParameters baseParameters,
-      Map<String, String> sourceProps) {
-    sourceProps.put("type", "mysql-cdc");
-    sourceProps.put("default-database", baseParameters.getSourceDatabaseName());
-    sourceProps.put("username", baseParameters.getSourceUserName());
-    sourceProps.put("password", baseParameters.getSourcePassword());
-    sourceProps.put("hostname", baseParameters.getSourceHostName());
-    sourceProps.put("port", baseParameters.getSourcePort());
-  }
-
   private static Configuration setFlinkConf() {
     Configuration configuration = new Configuration();
     configuration.setInteger(RestOptions.PORT, 8081);
     return configuration;
+  }
+
+  private static String toUpperFirstCase(String str) {
+    return str.substring(0, 1).toUpperCase() + str.substring(1);
+  }
+
+  private static String[] parseParams(String[] args) {
+    Options options = new Options();
+    Option sinkType = Option.builder("sinkType").required(true).hasArg().argName("sinkType")
+        .desc("Specify the type of target database").build();
+    Option sinkDatabase = Option.builder("sinkDatabase").required(true).hasArg()
+        .argName("sinkDatabase").desc("Specify the database name of target database").build();
+    options.addOption(sinkType);
+    options.addOption(sinkDatabase);
+
+    CommandLineParser parser = new DefaultParser();
+    CommandLine cmd = null;
+    try {
+      cmd = parser.parse(options, args);
+    } catch (ParseException e) {
+      throw new RuntimeException(e);
+    }
+
+    String[] params = new String[2];
+
+    if (cmd.hasOption("sinkType")) {
+      params[0] = cmd.getOptionValue("sinkType");
+    } else {
+      throw new RuntimeException("parse Param 'sinkType' fail");
+    }
+    if (cmd.hasOption("sinkDatabase")) {
+      params[1] = cmd.getOptionValue("sinkDatabase");
+    } else {
+      throw new RuntimeException("parse Param 'sinkDatabase' fail");
+    }
+    return params;
   }
 }

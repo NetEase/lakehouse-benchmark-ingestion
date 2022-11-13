@@ -15,41 +15,24 @@
  * limitations under the License.
  */
 
-package com.netease.arctic.benchmark.ingestion.params.catalog;
+package com.netease.arctic.benchmark.ingestion.params.table;
 
-import com.netease.arctic.benchmark.ingestion.config.HudiConfigOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Preconditions;
 
-public class HudiParameters {
-
+/**
+ * A utility class helps parse and manage Iceberg table parameters that are used for create Iceberg
+ * tables
+ */
+public class IcebergParameters {
   protected final Configuration eduardConfig;
 
-  public HudiParameters(Configuration eduardConfig) {
+  public IcebergParameters(Configuration eduardConfig) {
     this.eduardConfig = Preconditions.checkNotNull(eduardConfig);
   }
 
-  public String getHiveMetastoreUri() {
-    return eduardConfig.getString(HudiConfigOptions.HUDI_HIVE_METASTORE_URL);
+  public Configuration getEduardConfig() {
+    return eduardConfig;
   }
 
-  public String getTableType() {
-    return eduardConfig.getString(HudiConfigOptions.HUDI_TABLE_TYPE);
-  }
-
-  public int getReadTasks() {
-    return eduardConfig.getInteger(HudiConfigOptions.HUDI_READ_TASKS);
-  }
-
-  public int getWriteTasks() {
-    return eduardConfig.getInteger(HudiConfigOptions.HUDI_WRITE_TASKS);
-  }
-
-  public int getCompactionTasks() {
-    return eduardConfig.getInteger(HudiConfigOptions.HUDI_COMPACTION_TASKS);
-  }
-
-  public String getCompactionStrategy() {
-    return eduardConfig.getString(HudiConfigOptions.HUDI_COMPACTION_TRIGGER_STRATEGY);
-  }
 }

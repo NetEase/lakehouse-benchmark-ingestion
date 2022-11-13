@@ -52,6 +52,9 @@ import static com.ververica.cdc.connectors.mysql.table.MySqlReadableMetadata.TAB
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+/**
+ * database synchronize function, includes getting data sources and converting data types
+ */
 @SuppressWarnings("unused")
 public class SyncDbFunction {
   private static final Logger LOG = LoggerFactory.getLogger(SyncDbFunction.class);

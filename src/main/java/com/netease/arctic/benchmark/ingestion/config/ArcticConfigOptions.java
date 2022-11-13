@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * {@link ConfigOption}s for {@link com.netease.arctic.benchmark.ingestion.sink.ArcticCatalogSync}.
+ */
 public class ArcticConfigOptions {
   public static final String TYPE = "arctic";
 
@@ -31,7 +34,7 @@ public class ArcticConfigOptions {
       ConfigOptions.key("arctic.metastore.url").stringType().noDefaultValue();
 
   public static final ConfigOption<String> ARCTIC_OPTIMIZE_GROUP_NAME =
-      ConfigOptions.key("arctic.optimize.group.name").stringType().noDefaultValue();
+      ConfigOptions.key("arctic.optimize.group.name").stringType().defaultValue("default");
 
   public static void fillRequiredOptions(Map<String, String> props) {
     props.put("type", TYPE);

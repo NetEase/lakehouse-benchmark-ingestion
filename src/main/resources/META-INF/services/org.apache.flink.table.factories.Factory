@@ -14,6 +14,9 @@
 # limitations under the License.
 
 com.netease.arctic.benchmark.ingestion.source.MysqlCdcCatalogFactory
+com.netease.arctic.flink.catalog.factories.ArcticCatalogFactory
+org.apache.hudi.table.catalog.HoodieCatalogFactory
+org.apache.hudi.table.HoodieTableFactory
 #org.apache.iceberg.flink.FlinkCatalogFactory
 org.apache.flink.table.planner.delegation.DefaultExecutorFactory
 org.apache.flink.table.planner.delegation.DefaultPlannerFactory

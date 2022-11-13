@@ -19,16 +19,16 @@
     <flink.version>1.14.5</flink.version>
     <scala.binary.version>2.12</scala.binary.version>
     <iceberg.version>0.14.0</iceberg.version>
-    <arctic.version>0.3.2-SNAPSHOT</arctic.version>
+    <arctic.version>0.3.2</arctic.version>
     <hudi.version>0.11.1</hudi.version>
-    <flink-connector-mysql-cdc.version>2.3-SNAPSHOT</flink-connector-mysql-cdc.version>
+    <flink-connector-mysql-cdc.version>2.3.0</flink-connector-mysql-cdc.version>
     <lombok.version>1.18.20</lombok.version>
     <scala-maven-plugin.version>4.4.0</scala-maven-plugin.version>
     <hadoop.version>2.9.2</hadoop.version>
     <commons-cli.version>1.3.1</commons-cli.version>
     <mysql-connector-java.version>8.0.27</mysql-connector-java.version>
-    <parquet-avro.version>1.12.0</parquet-avro.version>
-    <hive-exec.version>2.3.1</hive-exec.version>
+    <parquet-avro.version>1.10.1</parquet-avro.version>
+    <hive.version>2.1.1</hive.version>
     <avro.version>1.10.0</avro.version>
     <slf4j-log4j12.version>1.7.30</slf4j-log4j12.version>
     <commons-compress.version>1.21</commons-compress.version>
@@ -82,6 +82,38 @@
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-hdfs</artifactId>
       <version>${hadoop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-common</artifactId>
+      <version>${hadoop.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-math3</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-mapreduce-client-core</artifactId>
+      <version>${hadoop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-mapreduce-client-common</artifactId>
+      <version>${hadoop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+      <version>${hadoop.version}</version>
+    </dependency>
+    <!--hudi dependencies-->
+    <dependency>
+      <groupId>org.apache.hudi</groupId>
+      <artifactId>hudi-flink1.14-bundle_${scala.binary.version}</artifactId>
+      <version>${hudi.version}</version>
     </dependency>
     <!--iceberg dependencies-->
     <dependency>
@@ -221,17 +253,16 @@
       <artifactId>arctic-flink-runtime-1.14</artifactId>
       <version>${arctic.version}</version>
     </dependency>
-    <!--hudi dependencies-->
-    <dependency>
-      <groupId>org.apache.hudi</groupId>
-      <artifactId>hudi-flink1.14-bundle_${scala.binary.version}</artifactId>
-      <version>${hudi.version}</version>
-    </dependency>
     <!--hive dependencies-->
     <dependency>
       <groupId>org.apache.hive</groupId>
+      <artifactId>hive-metastore</artifactId>
+      <version>${hive.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hive</groupId>
       <artifactId>hive-exec</artifactId>
-      <version>${hive-exec.version}</version>
+      <version>${hive.version}</version>
       <classifier>core</classifier>
       <exclusions>
         <exclusion>

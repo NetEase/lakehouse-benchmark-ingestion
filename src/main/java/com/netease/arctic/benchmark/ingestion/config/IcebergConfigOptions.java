@@ -20,11 +20,13 @@ package com.netease.arctic.benchmark.ingestion.config;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ConfigOptions;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * {@link ConfigOption}s for {@link com.netease.arctic.benchmark.ingestion.sink.IcebergCatalogSync}.
+ */
 public class IcebergConfigOptions {
 
   public static final String TYPE = "iceberg";
@@ -64,7 +66,7 @@ public class IcebergConfigOptions {
     List<String> catalogPropertyKeys = new ArrayList<>();
     catalogPropertyKeys.add("iceberg.uri");
     catalogPropertyKeys.add("iceberg.warehouse");
-    catalogPropertyKeys.add("iceberg.catalog.type");
+    catalogPropertyKeys.add("iceberg.catalog-type");
     return catalogPropertyKeys;
   }
 }

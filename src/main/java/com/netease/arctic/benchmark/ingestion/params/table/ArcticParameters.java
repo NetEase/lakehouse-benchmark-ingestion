@@ -15,12 +15,16 @@
  * limitations under the License.
  */
 
-package com.netease.arctic.benchmark.ingestion.params.catalog;
+package com.netease.arctic.benchmark.ingestion.params.table;
 
 import com.netease.arctic.benchmark.ingestion.config.ArcticConfigOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Preconditions;
 
+/**
+ * A utility class helps parse and manage Arctic table parameters that are used for create Arctic
+ * tables
+ */
 public class ArcticParameters {
 
   protected final Configuration eduardConfig;

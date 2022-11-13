@@ -17,9 +17,13 @@
 
 package com.netease.arctic.benchmark.ingestion.config;
 
+import com.netease.arctic.benchmark.ingestion.BaseCatalogSync;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ConfigOptions;
 
+/**
+ * {@link ConfigOption}s for {@link BaseCatalogSync}.
+ */
 public class BaseConfigOptions {
   public static final ConfigOption<String> SOURCE_TYPE =
       ConfigOptions.key("source.type").stringType().noDefaultValue();
@@ -47,12 +51,6 @@ public class BaseConfigOptions {
 
   public static final ConfigOption<Integer> SOURCE_PARALLELISM =
       ConfigOptions.key("source.parallelism").intType().defaultValue(4);
-
-  public static final ConfigOption<String> SINK_TYPE =
-      ConfigOptions.key("sink.type").stringType().noDefaultValue();
-
-  public static final ConfigOption<String> SINK_DATABASE_NAME =
-      ConfigOptions.key("sink.database.name").stringType().defaultValue("benchmark");
 
   public static final ConfigOption<Integer> SINK_PARALLELISM =
       ConfigOptions.key("sink.parallelism").intType().defaultValue(4);

@@ -20,7 +20,7 @@ package com.netease.arctic.benchmark.ingestion;
 import com.netease.arctic.benchmark.ingestion.SyncDbFunction.RowDataVoidProcessFunction;
 import com.netease.arctic.benchmark.ingestion.params.CallContext;
 import com.netease.arctic.benchmark.ingestion.params.catalog.CatalogParams;
-import com.netease.arctic.benchmark.ingestion.params.BaseParameters;
+import com.netease.arctic.benchmark.ingestion.params.database.BaseParameters;
 import com.netease.arctic.benchmark.ingestion.source.MysqlCdcCatalog;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -43,6 +43,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Basic class for data ingestion
+ */
 public abstract class BaseCatalogSync implements Consumer<CallContext> {
 
   private final BaseParameters baseParameters;
@@ -74,7 +77,9 @@ public abstract class BaseCatalogSync implements Consumer<CallContext> {
     try {
       pathAndTable = SyncDbFunction.getPathAndTable(mysqlCdcCatalog,
           sourceCatalogParams.getDataBaseName(), syncTableList);
-      createTable(destCatalog, destCatalogParams.getDataBaseName(), pathAndTable);
+      if (baseParameters.getSourceScanStartupMode().equals("initial")) {
+        createTable(destCatalog, destCatalogParams.getDataBaseName(), pathAndTable);
+      }
       source = SyncDbFunction.getMySqlSource(mysqlCdcCatalog, sourceDatabaseName, syncTableList,
           SyncDbFunction.getDebeziumDeserializeSchemas(pathAndTable),
           baseParameters.getSourceScanStartupMode());
@@ -101,7 +106,7 @@ public abstract class BaseCatalogSync implements Consumer<CallContext> {
 
   private CatalogParams getDestCatalogParam(Configuration configuration) {
     String catalogName = baseParameters.getSinkType().toLowerCase() + "_catalog_ignore";
-    String databaseName = baseParameters.getSinkDatabaseName();
+    String databaseName = baseParameters.getSinkDatabase();
     return CatalogParams.builder().catalogName(catalogName).dataBaseName(databaseName).build();
   }
 
