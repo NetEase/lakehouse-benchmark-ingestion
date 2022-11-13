@@ -49,7 +49,8 @@ import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Start-up class
+ * Start-up class, includes parsing configuration files, creating source and sink catalogs
+ * and calling synchronisation functions
  */
 @Slf4j
 public class MainRunner {

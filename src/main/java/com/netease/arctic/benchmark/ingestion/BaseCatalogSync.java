@@ -44,7 +44,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Basic class for data ingestion
+ * Basic class for data ingestion, includes getting the table schema,
+ * monitoring the database data via flink cdc and inserting the database data into the data lake.
  */
 public abstract class BaseCatalogSync implements Consumer<CallContext> {
 
