@@ -57,7 +57,7 @@ public class MainRunner {
   private static final Logger LOG = LoggerFactory.getLogger(MainRunner.class);
   private static StreamExecutionEnvironment env;
   private static StreamTableEnvironment tableEnv;
-  public static final String EDUARD_CONF_FILENAME = "conf/ingestion-conf.yaml";
+  public static final String EDUARD_CONF_FILENAME = "ingestion-conf.yaml";
 
   public static void main(String[] args)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException {

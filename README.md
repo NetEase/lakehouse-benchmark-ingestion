@@ -4,13 +4,13 @@ lakehouse-benchmark-ingestion是网易开源的数据湖性能基准测试lakeho
 
 ## 快速开始
 1. 下载项目代码 `git clone xxx`
-2. 修改resource/conf/ingestion-conf.yaml，填写配置项信息
+2. 修改resource/ingestion-conf.yaml，填写配置项信息
 3. 通过命令`mvn clean install -DskipTests`编译项目 
 4. 进入target目录，通过`java -cp eduard-1.0-SNAPSHOT.jar com.netease.arctic.benchmark.ingestion.MainRunner -sinkType [arctic/iceberg/hudi] -sinkDatabase [dbName]`命令启动数据同步工具 
 5. 通过`localhost:8081`打开Flink Web UI，观察数据同步的情况
 
 ## 支持的参数
-以下参数均可以通过resource/conf/ingestion-conf.yaml文件进行配置。
+以下参数均可以通过resource/ingestion-conf.yaml文件进行配置。
 
 | 参数项                      | 是否必须 | 默认值     | 描述                                                        |
 |--------------------------|------|---------|-----------------------------------------------------------|
