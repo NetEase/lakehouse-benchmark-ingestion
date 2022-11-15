@@ -32,7 +32,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SyncDbParams implements Serializable {
+public class SyncDBParams implements Serializable {
   Schema schema;
   OutputTag<Row> tag;
   String db;

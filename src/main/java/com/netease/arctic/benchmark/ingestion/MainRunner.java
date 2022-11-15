@@ -18,9 +18,9 @@
 package com.netease.arctic.benchmark.ingestion;
 
 import com.netease.arctic.benchmark.ingestion.config.CatalogConfigUtil;
-import com.netease.arctic.benchmark.ingestion.params.database.BaseParameters;
 import com.netease.arctic.benchmark.ingestion.params.CallContext;
 import com.netease.arctic.benchmark.ingestion.params.ParameterUtil;
+import com.netease.arctic.benchmark.ingestion.params.database.BaseParameters;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -29,7 +29,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.IllegalConfigurationException;
 import org.apache.flink.configuration.RestOptions;
+import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.api.bridge.java.internal.StreamTableEnvironmentImpl;
@@ -38,19 +40,20 @@ import org.apache.flink.table.operations.ddl.CreateCatalogOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Start-up class, includes parsing configuration files, creating source and sink catalogs
- * and calling synchronisation functions
+ * Start-up class, includes parsing configuration files, creating source and sink catalogs and
+ * calling synchronisation functions
  */
 @Slf4j
 public class MainRunner {
@@ -63,18 +66,21 @@ public class MainRunner {
   public static void main(String[] args)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     Class.forName("com.mysql.jdbc.Driver");
-    System.setProperty("HADOOP_USER_NAME", "sloth");
 
-    Map<String, String> props = new HashMap<>();
-    Configuration configuration = loadYAMLResource(
-        MainRunner.class.getClassLoader().getResourceAsStream(EDUARD_CONF_FILENAME), props);
     String[] params = parseParams(args);
-    String sinkType = params[0];
-    String sinkDatabase = params[1];
+    String confDir = params[0];
+    String sinkType = params[1];
+    String sinkDatabase = params[2];
+    int restPort = Integer.parseInt(params[3]);
+    Map<String, String> props = new HashMap<>();
+    Configuration configuration = loadConfiguration(confDir, props);
+
     BaseParameters baseParameters = new BaseParameters(configuration, sinkType, sinkDatabase);
 
-    env = StreamExecutionEnvironment.getExecutionEnvironment(setFlinkConf());
+    env = StreamExecutionEnvironment.getExecutionEnvironment(setFlinkConf(restPort));
+    env.setStateBackend(new FsStateBackend("file:///tmp/benchmark-ingestion"));
     env.getCheckpointConfig().setCheckpointInterval(60 * 1000L);
+    env.getCheckpointConfig().setTolerableCheckpointFailureNumber(10);
     tableEnv = StreamTableEnvironment.create(env);
     createSourceCatalog(baseParameters.getSourceType(), baseParameters);
     createSinkCatalog(sinkType, props);
@@ -130,11 +136,38 @@ public class MainRunner {
     ((StreamTableEnvironmentImpl) tableEnv).executeInternal(operation);
   }
 
-  private static Configuration loadYAMLResource(InputStream inputStream,
-      Map<String, String> props) {
+  private static Configuration loadConfiguration(final String configDir, Map<String, String> props) {
+
+    if (configDir == null) {
+      throw new IllegalArgumentException(
+          "Given configuration directory is null, cannot load configuration");
+    }
+
+    final File confDirFile = new File(configDir);
+    if (!(confDirFile.exists())) {
+      throw new IllegalConfigurationException(
+          "The given configuration directory name '" + configDir + "' (" +
+              confDirFile.getAbsolutePath() + ") does not describe an existing directory.");
+    }
+
+    // get Flink yaml configuration file
+    final File yamlConfigFile = new File(confDirFile, EDUARD_CONF_FILENAME);
+
+    if (!yamlConfigFile.exists()) {
+      throw new IllegalConfigurationException("The Flink config file '" + yamlConfigFile + "' (" +
+          yamlConfigFile.getAbsolutePath() + ") does not exist.");
+    }
+
+    Configuration configuration = loadYAMLResource(yamlConfigFile, props);
+
+    return configuration;
+  }
+
+  private static Configuration loadYAMLResource(File file, Map<String, String> props) {
     final Configuration config = new Configuration();
 
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+    try (BufferedReader reader =
+        new BufferedReader(new InputStreamReader(Files.newInputStream(file.toPath())))) {
 
       String line;
       int lineNo = 0;
@@ -173,9 +206,9 @@ public class MainRunner {
     return config;
   }
 
-  private static Configuration setFlinkConf() {
+  private static Configuration setFlinkConf(int restPort) {
     Configuration configuration = new Configuration();
-    configuration.setInteger(RestOptions.PORT, 8081);
+    configuration.setInteger(RestOptions.PORT, restPort);
     return configuration;
   }
 
@@ -185,12 +218,18 @@ public class MainRunner {
 
   private static String[] parseParams(String[] args) {
     Options options = new Options();
+    Option confDir = Option.builder("confDir").required(true).hasArg().argName("confDir")
+        .desc("Specify the directory of ingestion-conf yaml").build();
     Option sinkType = Option.builder("sinkType").required(true).hasArg().argName("sinkType")
         .desc("Specify the type of target database").build();
     Option sinkDatabase = Option.builder("sinkDatabase").required(true).hasArg()
         .argName("sinkDatabase").desc("Specify the database name of target database").build();
+    Option restPort = Option.builder("restPort").required(false).hasArg().argName("restPort")
+        .desc("Specify the port of Flink Web UI").build();
+    options.addOption(confDir);
     options.addOption(sinkType);
     options.addOption(sinkDatabase);
+    options.addOption(restPort);
 
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd = null;
@@ -200,17 +239,28 @@ public class MainRunner {
       throw new RuntimeException(e);
     }
 
-    String[] params = new String[2];
+    String[] params = new String[4];
 
+    if (cmd.hasOption("confDir")) {
+      params[0] = cmd.getOptionValue("confDir");
+    } else {
+      throw new RuntimeException("parse Param 'confDir' fail");
+    }
     if (cmd.hasOption("sinkType")) {
-      params[0] = cmd.getOptionValue("sinkType");
+      params[1] = cmd.getOptionValue("sinkType");
     } else {
       throw new RuntimeException("parse Param 'sinkType' fail");
     }
     if (cmd.hasOption("sinkDatabase")) {
-      params[1] = cmd.getOptionValue("sinkDatabase");
+      params[2] = cmd.getOptionValue("sinkDatabase");
     } else {
       throw new RuntimeException("parse Param 'sinkDatabase' fail");
+    }
+    if (cmd.hasOption("restPort")) {
+      params[3] = cmd.getOptionValue("restPort");
+    } else {
+      params[3] = "8081";
+      LOG.info("No rest port specified, will bind to 8081");
     }
     return params;
   }

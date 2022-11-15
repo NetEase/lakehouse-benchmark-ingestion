@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-com.netease.arctic.benchmark.ingestion.source.MysqlCdcCatalogFactory
+com.netease.arctic.benchmark.ingestion.source.MysqlCDCCatalogFactory
 com.netease.arctic.flink.catalog.factories.ArcticCatalogFactory
 org.apache.hudi.table.catalog.HoodieCatalogFactory
 org.apache.hudi.table.HoodieTableFactory

@@ -17,8 +17,8 @@
 
 package com.netease.arctic.benchmark.ingestion;
 
-import com.netease.arctic.benchmark.ingestion.params.database.SyncDbParams;
-import com.netease.arctic.benchmark.ingestion.source.MysqlCdcCatalog;
+import com.netease.arctic.benchmark.ingestion.params.database.SyncDBParams;
+import com.netease.arctic.benchmark.ingestion.source.MysqlCDCCatalog;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.ververica.cdc.connectors.mysql.table.MySqlDeserializationConverterFactory;
 import com.ververica.cdc.connectors.mysql.table.StartupOptions;
@@ -60,7 +60,7 @@ public class SyncDbFunction {
   private static final Logger LOG = LoggerFactory.getLogger(SyncDbFunction.class);
 
   public static List<Tuple2<ObjectPath, ResolvedCatalogTable>> getPathAndTable(
-      final MysqlCdcCatalog mysql, final String mysqlDb, List<String> tableList)
+      final MysqlCDCCatalog mysql, final String mysqlDb, List<String> tableList)
       throws DatabaseNotExistException {
     return mysql.listTables(mysqlDb).stream().filter(t -> !t.equals("heartbeat"))
         .filter(tableList::contains).map(t -> {
@@ -74,7 +74,7 @@ public class SyncDbFunction {
         }).collect(toList());
   }
 
-  public static MySqlSource<RowData> getMySqlSource(final MysqlCdcCatalog mysql,
+  public static MySqlSource<RowData> getMySqlSource(final MysqlCDCCatalog mysql,
       final String srcCatalogDb, List<String> tableList,
       final Map<String, RowDataDebeziumDeserializeSchema> maps, String startUpMode) {
     return MySqlSource.<RowData>builder().hostname(mysql.getHostname()).port(mysql.getPort())
@@ -102,7 +102,7 @@ public class SyncDbFunction {
         e -> RowRowConverter.create(e.f1.getResolvedSchema().toPhysicalRowDataType())));
   }
 
-  public static List<SyncDbParams> getParamsList(final String mysqlDb,
+  public static List<SyncDBParams> getParamsList(final String mysqlDb,
       final List<Tuple2<ObjectPath, ResolvedCatalogTable>> pathAndTable) {
     return pathAndTable.stream().map(e -> {
       final OutputTag<Row> tag = new OutputTag<Row>(e.f0.getFullName()) {};
@@ -110,7 +110,7 @@ public class SyncDbFunction {
           .map(c -> DataTypes.FIELD(c.getName(), c.getDataType())).collect(toList());
       final Schema schema = Schema.newBuilder()
           .column("f0", DataTypes.ROW(fields.toArray(new DataTypes.Field[] {}))).build();
-      return SyncDbParams.builder().table(e.f0.getObjectName())
+      return SyncDBParams.builder().table(e.f0.getObjectName())
           .path(new ObjectPath(mysqlDb, e.f0.getObjectName())).tag(tag).schema(schema).build();
     }).collect(toList());
   }

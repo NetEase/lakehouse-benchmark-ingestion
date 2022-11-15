@@ -63,7 +63,7 @@ import static org.apache.flink.table.factories.FactoryUtil.CONNECTOR;
 /**
  * Catalog for Mysql.
  */
-public class MysqlCdcCatalog extends AbstractJdbcCatalog {
+public class MysqlCDCCatalog extends AbstractJdbcCatalog {
 
   private static final Set<String> builtinDatabases = new HashSet<String>() {
     {
@@ -83,7 +83,7 @@ public class MysqlCdcCatalog extends AbstractJdbcCatalog {
 
   private final int port;
 
-  public MysqlCdcCatalog(String catalogName, String defaultDatabase, String username, String pwd,
+  public MysqlCDCCatalog(String catalogName, String defaultDatabase, String username, String pwd,
       final String hostname, final int port) {
     super(catalogName, defaultDatabase, username, pwd,
         String.format("jdbc:mysql://%s:%d", hostname, port));
@@ -92,8 +92,8 @@ public class MysqlCdcCatalog extends AbstractJdbcCatalog {
   }
 
   public static void main(String[] args) throws DatabaseNotExistException, TableNotExistException {
-    final MysqlCdcCatalog catalog =
-        new MysqlCdcCatalog("mysql", "chbenchmark", "sys", "netease", "10.171.161.168", 3332);
+    final MysqlCDCCatalog catalog =
+        new MysqlCDCCatalog("mysql", "chbenchmark", "sys", "netease", "10.171.161.168", 3332);
     catalog.listDatabases().forEach(System.out::println);
     catalog.listTables("test").forEach(System.out::println);
     System.out.println(catalog.getTable(new ObjectPath("test", "test")).getOptions());

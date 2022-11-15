@@ -1,0 +1,27 @@
+<assembly>
+    <id>${project.artifactId}</id>
+    <formats>
+        <format>tar.gz</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <fileSets>
+        <fileSet>
+            <directory>${project.build.directory}</directory>
+            <includes>
+                <include>eduard-1.0-SNAPSHOT.jar</include>
+                <!--
+                <include>metadata.properties</include>
+                -->
+            </includes>
+            <outputDirectory>/</outputDirectory>
+        </fileSet>
+    </fileSets>
+    <files>
+        <file>
+            <source>${project.build.outputDirectory}/ingestion-conf.yaml</source>
+            <outputDirectory>/conf</outputDirectory>
+        </file>
+    </files>
+
+</assembly>
+

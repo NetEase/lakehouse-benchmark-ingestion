@@ -29,5 +29,5 @@ import lombok.NoArgsConstructor;
 public class CatalogParams {
 
   String catalogName;
-  String dataBaseName;
+  String databaseName;
 }

@@ -33,11 +33,11 @@ import static org.apache.flink.connector.jdbc.catalog.factory.JdbcCatalogFactory
 import static org.apache.flink.table.factories.FactoryUtil.PROPERTY_VERSION;
 
 /**
- * Factory for {@link MysqlCdcCatalog}.
+ * Factory for {@link MysqlCDCCatalog}.
  */
-public class MysqlCdcCatalogFactory implements CatalogFactory {
+public class MysqlCDCCatalogFactory implements CatalogFactory {
 
-  private static final Logger LOG = LoggerFactory.getLogger(MysqlCdcCatalogFactory.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MysqlCDCCatalogFactory.class);
 
   @Override
   public String factoryIdentifier() {
@@ -68,7 +68,7 @@ public class MysqlCdcCatalogFactory implements CatalogFactory {
         FactoryUtil.createCatalogFactoryHelper(this, context);
     helper.validate();
 
-    return new MysqlCdcCatalog(context.getName(), helper.getOptions().get(DEFAULT_DATABASE),
+    return new MysqlCDCCatalog(context.getName(), helper.getOptions().get(DEFAULT_DATABASE),
         helper.getOptions().get(USERNAME), helper.getOptions().get(PASSWORD),
         helper.getOptions().get(HOSTNAME), helper.getOptions().get(PORT));
   }

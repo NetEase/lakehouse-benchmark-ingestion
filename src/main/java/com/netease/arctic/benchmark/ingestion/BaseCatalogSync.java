@@ -21,7 +21,7 @@ import com.netease.arctic.benchmark.ingestion.SyncDbFunction.RowDataVoidProcessF
 import com.netease.arctic.benchmark.ingestion.params.CallContext;
 import com.netease.arctic.benchmark.ingestion.params.catalog.CatalogParams;
 import com.netease.arctic.benchmark.ingestion.params.database.BaseParameters;
-import com.netease.arctic.benchmark.ingestion.source.MysqlCdcCatalog;
+import com.netease.arctic.benchmark.ingestion.source.MysqlCDCCatalog;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -44,8 +44,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Basic class for data ingestion, includes getting the table schema,
- * monitoring the database data via flink cdc and inserting the database data into the data lake.
+ * Basic class for data ingestion, includes getting the table schema, monitoring the database data
+ * via flink cdc and inserting the database data into the data lake.
  */
 public abstract class BaseCatalogSync implements Consumer<CallContext> {
 
@@ -66,10 +66,10 @@ public abstract class BaseCatalogSync implements Consumer<CallContext> {
     CatalogParams sourceCatalogParams = getSourceCatalogParam(configuration);
     CatalogParams destCatalogParams = getDestCatalogParam(configuration);
 
-    final MysqlCdcCatalog mysqlCdcCatalog =
-        (MysqlCdcCatalog) getCatalog(tableEnv, sourceCatalogParams);
+    final MysqlCDCCatalog mysqlCdcCatalog =
+        (MysqlCDCCatalog) getCatalog(tableEnv, sourceCatalogParams);
     final Catalog destCatalog = getCatalog(tableEnv, destCatalogParams);
-    String sourceDatabaseName = sourceCatalogParams.getDataBaseName();
+    String sourceDatabaseName = sourceCatalogParams.getDatabaseName();
     List<String> syncTableList =
         getSyncTableList(mysqlCdcCatalog, sourceDatabaseName, baseParameters);
     final List<Tuple2<ObjectPath, ResolvedCatalogTable>> pathAndTable;
@@ -77,9 +77,9 @@ public abstract class BaseCatalogSync implements Consumer<CallContext> {
 
     try {
       pathAndTable = SyncDbFunction.getPathAndTable(mysqlCdcCatalog,
-          sourceCatalogParams.getDataBaseName(), syncTableList);
+          sourceCatalogParams.getDatabaseName(), syncTableList);
       if (baseParameters.getSourceScanStartupMode().equals("initial")) {
-        createTable(destCatalog, destCatalogParams.getDataBaseName(), pathAndTable);
+        createTable(destCatalog, destCatalogParams.getDatabaseName(), pathAndTable);
       }
       source = SyncDbFunction.getMySqlSource(mysqlCdcCatalog, sourceDatabaseName, syncTableList,
           SyncDbFunction.getDebeziumDeserializeSchemas(pathAndTable),
@@ -102,13 +102,13 @@ public abstract class BaseCatalogSync implements Consumer<CallContext> {
   private CatalogParams getSourceCatalogParam(Configuration configuration) {
     String catalogName = baseParameters.getSourceType().toLowerCase() + "_catalog";
     String databaseName = baseParameters.getSourceDatabaseName();
-    return CatalogParams.builder().catalogName(catalogName).dataBaseName(databaseName).build();
+    return CatalogParams.builder().catalogName(catalogName).databaseName(databaseName).build();
   }
 
   private CatalogParams getDestCatalogParam(Configuration configuration) {
     String catalogName = baseParameters.getSinkType().toLowerCase() + "_catalog_ignore";
     String databaseName = baseParameters.getSinkDatabase();
-    return CatalogParams.builder().catalogName(catalogName).dataBaseName(databaseName).build();
+    return CatalogParams.builder().catalogName(catalogName).databaseName(databaseName).build();
   }
 
   private SingleOutputStreamOperator<Void> sideOutputHandler(StreamExecutionEnvironment env,
@@ -119,7 +119,7 @@ public abstract class BaseCatalogSync implements Consumer<CallContext> {
         .uid("split stream").name("split stream").setParallelism(4);
   }
 
-  private List<String> getSyncTableList(MysqlCdcCatalog mysqlCdcCatalog, String sourceDatabaseName,
+  private List<String> getSyncTableList(MysqlCDCCatalog mysqlCdcCatalog, String sourceDatabaseName,
       BaseParameters baseParameters) {
     String tableListParam = baseParameters.getSourceTableName();
     List<String> tableList = new ArrayList<>();
@@ -140,10 +140,10 @@ public abstract class BaseCatalogSync implements Consumer<CallContext> {
       CatalogParams sourceCatalogParams, CatalogParams destCatalogParams,
       List<Tuple2<ObjectPath, ResolvedCatalogTable>> s) {
     final StatementSet set = tableEnv.createStatementSet();
-    SyncDbFunction.getParamsList(sourceCatalogParams.getDataBaseName(), s).forEach(p -> {
+    SyncDbFunction.getParamsList(sourceCatalogParams.getDatabaseName(), s).forEach(p -> {
       tableEnv.createTemporaryView(p.getTable(), process.getSideOutput(p.getTag()), p.getSchema());
       String sql = String.format("INSERT INTO %s.%s.%s SELECT f0.* FROM %s",
-          destCatalogParams.getCatalogName(), destCatalogParams.getDataBaseName(),
+          destCatalogParams.getCatalogName(), destCatalogParams.getDatabaseName(),
           p.getPath().getObjectName(), p.getTable());
       set.addInsertSql(sql);
     });

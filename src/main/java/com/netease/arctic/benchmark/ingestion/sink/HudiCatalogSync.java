@@ -59,15 +59,15 @@ public class HudiCatalogSync extends BaseCatalogSync {
     }
 
     final String HIVE_META_STORE_URI = hudiParameters.getHiveMetastoreUri();
-    boolean is_hive_sync = hudiParameters.getHiveSyncEnable();
+    boolean isHiveSync = hudiParameters.getHiveSyncEnable();
     final Map<String, String> options = new HashMap<>();
-    if (is_hive_sync) {
+    if (isHiveSync) {
       options.put("hive_sync.metastore.uris", HIVE_META_STORE_URI);
     }
 
     pathAndTable.forEach(e -> {
       try {
-        fillHudiTableOptions(options, is_hive_sync, dbName, e.f0.getObjectName());
+        fillHudiTableOptions(options, isHiveSync, dbName, e.f0.getObjectName());
         ObjectPath objectPath = new ObjectPath(dbName, e.f0.getObjectName());
 
         if (hudi.tableExists(objectPath)) {
@@ -85,9 +85,9 @@ public class HudiCatalogSync extends BaseCatalogSync {
     });
   }
 
-  private void fillHudiTableOptions(Map<String, String> options, boolean is_hive_sync,
-      String dbName, String tableName) {
-    if (is_hive_sync) {
+  private void fillHudiTableOptions(Map<String, String> options, boolean isHiveSync, String dbName,
+      String tableName) {
+    if (isHiveSync) {
       options.put("hive_sync.enable", "true");
       options.put("hive_sync.mode", "hms");
       options.put("hive_sync.db", dbName);
