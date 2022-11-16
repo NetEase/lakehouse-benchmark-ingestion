@@ -8,7 +8,7 @@
         <fileSet>
             <directory>${project.build.directory}</directory>
             <includes>
-                <include>eduard-1.0-SNAPSHOT.jar</include>
+                <include>lakehouse-benchmark-ingestion-1.0-SNAPSHOT.jar</include>
                 <!--
                 <include>metadata.properties</include>
                 -->

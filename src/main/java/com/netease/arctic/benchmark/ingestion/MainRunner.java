@@ -136,7 +136,8 @@ public class MainRunner {
     ((StreamTableEnvironmentImpl) tableEnv).executeInternal(operation);
   }
 
-  private static Configuration loadConfiguration(final String configDir, Map<String, String> props) {
+  private static Configuration loadConfiguration(final String configDir,
+      Map<String, String> props) {
 
     if (configDir == null) {
       throw new IllegalArgumentException(

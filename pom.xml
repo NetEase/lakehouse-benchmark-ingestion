@@ -5,9 +5,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.netease</groupId>
-  <artifactId>eduard</artifactId>
+  <artifactId>lakehouse-benchmark-ingestion</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>eduard</name>
+  <name>lakehouse-benchmark-ingestion</name>
   <packaging>jar</packaging>
 
   <properties>
@@ -16,7 +16,7 @@
     <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
     <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
-    <package.final.name>arctic_benchmark_ingestion</package.final.name>
+    <package.final.name>lakehouse_benchmark_ingestion</package.final.name>
 
     <flink.version>1.14.5</flink.version>
     <scala.binary.version>2.12</scala.binary.version>
@@ -114,6 +114,22 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+      <version>${hadoop.version}</version>
+    </dependency>
+    <!--aws dependencies-->
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-aws</artifactId>
+      <version>${hadoop.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-s3</artifactId>
+      <version>1.11.199</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-cloud-storage</artifactId>
       <version>${hadoop.version}</version>
     </dependency>
     <!--hudi dependencies-->
