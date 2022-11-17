@@ -20,7 +20,7 @@
 | restPort     | 否    | 8081   | Flink Web UI的端口                                                     |
 
 ### 配置文件参数
-以下参数均可以通过 resource/ingestion-conf.yaml 文件进行配置。
+以下参数均可以通过 conf/ingestion-conf.yaml 文件进行配置。
 
 | 参数项                      | 是否必须 | 默认值     | 描述                                                            |
 |--------------------------|------|---------|---------------------------------------------------------------|
@@ -35,9 +35,9 @@
 
 **Arctic相关**
 
-| 参数项                        | 是否必须 | 默认值 | 描述                        |
-|----------------------------|------|--|---------------------------|
-| arctic.metastore.url       | 是    | (none) | Arctic metastore 的 URL 地址 |
+| 参数项                        | 是否必须 | 默认值     | 描述                        |
+|----------------------------|------|---------|---------------------------|
+| arctic.metastore.url       | 是    | (none)  | Arctic metastore 的 URL 地址 |
 | arctic.optimize.group.name | 否    | default | Arctic Optimizer 资源组      |
  
 **Iceberg相关**
