@@ -28,7 +28,6 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.table.api.StatementSet;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.ObjectPath;
@@ -42,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+import lombok.SneakyThrows;
 
 /**
  * Basic class for data ingestion, includes getting the table schema, monitoring the database data
@@ -57,6 +57,7 @@ public abstract class BaseCatalogSync implements Consumer<CallContext> {
     this.baseParameters = baseParameters;
   }
 
+  @SneakyThrows
   @Override
   public void accept(final CallContext context) {
     StreamExecutionEnvironment env = context.getEnv();
@@ -64,11 +65,11 @@ public abstract class BaseCatalogSync implements Consumer<CallContext> {
     final Configuration configuration = tableEnv.getConfig().getConfiguration();
 
     CatalogParams sourceCatalogParams = getSourceCatalogParam(configuration);
-    CatalogParams destCatalogParams = getDestCatalogParam(configuration);
-
     final MysqlCDCCatalog mysqlCdcCatalog =
         (MysqlCDCCatalog) getCatalog(tableEnv, sourceCatalogParams);
+    CatalogParams destCatalogParams = getDestCatalogParam(configuration);
     final Catalog destCatalog = getCatalog(tableEnv, destCatalogParams);
+    destCatalogParams.setCatalog(destCatalog);
     String sourceDatabaseName = sourceCatalogParams.getDatabaseName();
     List<String> syncTableList =
         getSyncTableList(mysqlCdcCatalog, sourceDatabaseName, baseParameters);
@@ -91,6 +92,7 @@ public abstract class BaseCatalogSync implements Consumer<CallContext> {
     final SingleOutputStreamOperator<Void> process = sideOutputHandler(env, source, pathAndTable);
 
     insertData(tableEnv, process, sourceCatalogParams, destCatalogParams, pathAndTable);
+    env.execute();
   }
 
   public Catalog getCatalog(StreamTableEnvironment tableEnv, CatalogParams catalogParams) {
@@ -136,19 +138,10 @@ public abstract class BaseCatalogSync implements Consumer<CallContext> {
     return tableList;
   }
 
-  public void insertData(StreamTableEnvironment tableEnv, SingleOutputStreamOperator<Void> process,
+  public abstract void insertData(StreamTableEnvironment tableEnv,
+      SingleOutputStreamOperator<Void> process,
       CatalogParams sourceCatalogParams, CatalogParams destCatalogParams,
-      List<Tuple2<ObjectPath, ResolvedCatalogTable>> s) {
-    final StatementSet set = tableEnv.createStatementSet();
-    SyncDbFunction.getParamsList(sourceCatalogParams.getDatabaseName(), s).forEach(p -> {
-      tableEnv.createTemporaryView(p.getTable(), process.getSideOutput(p.getTag()), p.getSchema());
-      String sql = String.format("INSERT INTO %s.%s.%s SELECT f0.* FROM %s",
-          destCatalogParams.getCatalogName(), destCatalogParams.getDatabaseName(),
-          p.getPath().getObjectName(), p.getTable());
-      set.addInsertSql(sql);
-    });
-    set.execute();
-  }
+      List<Tuple2<ObjectPath, ResolvedCatalogTable>> s);
 
   public abstract void createTable(Catalog catalog, String dbName,
       List<Tuple2<ObjectPath, ResolvedCatalogTable>> pathAndTable)

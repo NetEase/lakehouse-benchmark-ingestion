@@ -17,11 +17,24 @@
 
 package com.netease.arctic.benchmark.ingestion.sink;
 
+import com.netease.arctic.ams.api.client.ArcticThriftUrl;
 import com.netease.arctic.benchmark.ingestion.BaseCatalogSync;
-import com.netease.arctic.benchmark.ingestion.params.table.ArcticParameters;
+import com.netease.arctic.benchmark.ingestion.SyncDbFunction;
+import com.netease.arctic.benchmark.ingestion.params.catalog.CatalogParams;
 import com.netease.arctic.benchmark.ingestion.params.database.BaseParameters;
+import com.netease.arctic.benchmark.ingestion.params.table.ArcticParameters;
+import com.netease.arctic.flink.InternalCatalogBuilder;
+import com.netease.arctic.flink.catalog.ArcticCatalog;
+import com.netease.arctic.flink.table.ArcticTableLoader;
+import com.netease.arctic.flink.util.ArcticUtils;
+import com.netease.arctic.flink.write.FlinkSink;
+import com.netease.arctic.table.ArcticTable;
+import com.netease.arctic.table.TableIdentifier;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
+import org.apache.flink.table.catalog.CatalogBaseTable;
 import org.apache.flink.table.catalog.CatalogDatabaseImpl;
 import org.apache.flink.table.catalog.ObjectPath;
 import org.apache.flink.table.catalog.ResolvedCatalogTable;
@@ -77,6 +90,38 @@ public class ArcticCatalogSync extends BaseCatalogSync {
       } catch (TableNotExistException ex) {
         throw new RuntimeException(ex);
       }
+    });
+  }
+
+  @Override
+  public void insertData(StreamTableEnvironment tableEnv, SingleOutputStreamOperator<Void> process,
+      CatalogParams sourceCatalogParams, CatalogParams destCatalogParams,
+      List<Tuple2<ObjectPath, ResolvedCatalogTable>> s) {
+    SyncDbFunction.getParamsList(sourceCatalogParams.getDatabaseName(), s).forEach(p -> {
+      ObjectPath objectPath = new ObjectPath(destCatalogParams.getDatabaseName(), p.getTable());
+      ArcticCatalog catalog = (ArcticCatalog) destCatalogParams.getCatalog();
+      CatalogBaseTable catalogTable;
+      try {
+        catalogTable = catalog.getTable(objectPath);
+      } catch (TableNotExistException e) {
+        throw new RuntimeException(e);
+      }
+      String url = arcticParameters.getMetastoreURL();
+      InternalCatalogBuilder catalogBuilder = InternalCatalogBuilder.builder()
+          .metastoreUrl(url);
+      ArcticThriftUrl arcticThriftUrl = ArcticThriftUrl.parse(url);
+      TableIdentifier tableIdentifier = TableIdentifier.of(arcticThriftUrl.catalogName(),
+          destCatalogParams.getDatabaseName(),
+          p.getPath().getObjectName());
+
+      ArcticTableLoader tableLoader = ArcticTableLoader.of(tableIdentifier, catalogBuilder);
+      ArcticTable table = ArcticUtils.loadArcticTable(tableLoader);
+
+      FlinkSink.forRowData(process.getSideOutput(p.getTag()))
+          .table(table)
+          .tableLoader(tableLoader)
+          .flinkSchema(catalogTable.getSchema())
+          .build();
     });
   }
 

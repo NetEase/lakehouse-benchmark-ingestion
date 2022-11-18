@@ -17,6 +17,7 @@
 
 package com.netease.arctic.benchmark.ingestion.params.catalog;
 
+import org.apache.flink.table.catalog.Catalog;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +29,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CatalogParams {
 
+  Catalog catalog;
   String catalogName;
   String databaseName;
 }

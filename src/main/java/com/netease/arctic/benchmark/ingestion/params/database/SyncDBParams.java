@@ -19,7 +19,7 @@ package com.netease.arctic.benchmark.ingestion.params.database;
 
 import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.catalog.ObjectPath;
-import org.apache.flink.types.Row;
+import org.apache.flink.table.data.RowData;
 import org.apache.flink.util.OutputTag;
 import java.io.Serializable;
 import java.util.List;
@@ -34,7 +34,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SyncDBParams implements Serializable {
   Schema schema;
-  OutputTag<Row> tag;
+  OutputTag<RowData> tag;
   String db;
   String table;
   ObjectPath path;

@@ -33,6 +33,10 @@ public class ArcticParameters {
     this.eduardConfig = Preconditions.checkNotNull(eduardConfig);
   }
 
+  public String getMetastoreURL() {
+    return eduardConfig.getString(ArcticConfigOptions.ARCTIC_METASTORE_URL);
+  }
+
   public String getOptimizeGroupName() {
     return eduardConfig.getString(ArcticConfigOptions.ARCTIC_OPTIMIZE_GROUP_NAME);
   }

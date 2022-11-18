@@ -18,9 +18,12 @@
 package com.netease.arctic.benchmark.ingestion.sink;
 
 import com.netease.arctic.benchmark.ingestion.BaseCatalogSync;
+import com.netease.arctic.benchmark.ingestion.params.catalog.CatalogParams;
 import com.netease.arctic.benchmark.ingestion.params.database.BaseParameters;
 import com.netease.arctic.benchmark.ingestion.params.table.IcebergParameters;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.CatalogDatabaseImpl;
 import org.apache.flink.table.catalog.ObjectPath;
@@ -44,6 +47,13 @@ public class IcebergCatalogSync extends BaseCatalogSync {
   public IcebergCatalogSync(BaseParameters baseParameters, IcebergParameters icebergParameters) {
     super(baseParameters);
     this.icebergParameters = icebergParameters;
+  }
+
+  @Override
+  public void insertData(StreamTableEnvironment tableEnv, SingleOutputStreamOperator<Void> process,
+      CatalogParams sourceCatalogParams, CatalogParams destCatalogParams,
+      List<Tuple2<ObjectPath, ResolvedCatalogTable>> s) {
+
   }
 
   @Override

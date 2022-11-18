@@ -29,6 +29,7 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.DataTypes.Field;
 import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.catalog.ObjectPath;
 import org.apache.flink.table.catalog.ResolvedCatalogTable;
@@ -38,7 +39,6 @@ import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.data.conversion.RowRowConverter;
 import org.apache.flink.table.data.utils.JoinedRowData;
 import org.apache.flink.table.types.logical.RowType;
-import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 import org.apache.kafka.connect.data.Struct;
@@ -92,7 +92,7 @@ public class SyncDbFunction {
                 (RowType) e.f1.getResolvedSchema().toPhysicalRowDataType().getLogicalType())
             .setUserDefinedConverterFactory(MySqlDeserializationConverterFactory.instance())
             .setMetadataConverters(
-                new MetadataConverter[] {TABLE_NAME.getConverter(), DATABASE_NAME.getConverter()})
+                new MetadataConverter[]{TABLE_NAME.getConverter(), DATABASE_NAME.getConverter()})
             .setResultTypeInfo(TypeInformation.of(RowData.class)).build()));
   }
 
@@ -105,11 +105,12 @@ public class SyncDbFunction {
   public static List<SyncDBParams> getParamsList(final String mysqlDb,
       final List<Tuple2<ObjectPath, ResolvedCatalogTable>> pathAndTable) {
     return pathAndTable.stream().map(e -> {
-      final OutputTag<Row> tag = new OutputTag<Row>(e.f0.getFullName()) {};
-      final List<DataTypes.Field> fields = e.f1.getResolvedSchema().getColumns().stream()
+      final OutputTag<RowData> tag = new OutputTag<RowData>(e.f0.getFullName()) {
+      };
+      final List<Field> fields = e.f1.getResolvedSchema().getColumns().stream()
           .map(c -> DataTypes.FIELD(c.getName(), c.getDataType())).collect(toList());
-      final Schema schema = Schema.newBuilder()
-          .column("f0", DataTypes.ROW(fields.toArray(new DataTypes.Field[] {}))).build();
+      final Schema schema = Schema.newBuilder().fromResolvedSchema(e.f1.getResolvedSchema())
+          .build();
       return SyncDBParams.builder().table(e.f0.getObjectName())
           .path(new ObjectPath(mysqlDb, e.f0.getObjectName())).tag(tag).schema(schema).build();
     }).collect(toList());
@@ -172,7 +173,18 @@ public class SyncDbFunction {
         throws Exception {
       final String key = rowData.getString(rowData.getArity() - 1).toString() + "." +
           rowData.getString(rowData.getArity() - 2).toString();
-      ctx.output(new OutputTag<Row>(key) {}, this.converters.get(key).toExternal(rowData));
+      ctx.output(new OutputTag<RowData>(key) {},getField(JoinedRowData.class,(JoinedRowData) rowData,"row1"));
+    }
+
+    private static <O, V> V getField(Class<O> clazz, O obj, String fieldName) {
+      try {
+        java.lang.reflect.Field field = clazz.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        Object v = field.get(obj);
+        return v == null ? null : (V) v;
+      } catch (NoSuchFieldException | IllegalAccessException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 }
