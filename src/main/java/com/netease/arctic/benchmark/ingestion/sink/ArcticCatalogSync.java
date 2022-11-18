@@ -107,21 +107,16 @@ public class ArcticCatalogSync extends BaseCatalogSync {
         throw new RuntimeException(e);
       }
       String url = arcticParameters.getMetastoreURL();
-      InternalCatalogBuilder catalogBuilder = InternalCatalogBuilder.builder()
-          .metastoreUrl(url);
+      InternalCatalogBuilder catalogBuilder = InternalCatalogBuilder.builder().metastoreUrl(url);
       ArcticThriftUrl arcticThriftUrl = ArcticThriftUrl.parse(url);
       TableIdentifier tableIdentifier = TableIdentifier.of(arcticThriftUrl.catalogName(),
-          destCatalogParams.getDatabaseName(),
-          p.getPath().getObjectName());
+          destCatalogParams.getDatabaseName(), p.getPath().getObjectName());
 
       ArcticTableLoader tableLoader = ArcticTableLoader.of(tableIdentifier, catalogBuilder);
       ArcticTable table = ArcticUtils.loadArcticTable(tableLoader);
 
-      FlinkSink.forRowData(process.getSideOutput(p.getTag()))
-          .table(table)
-          .tableLoader(tableLoader)
-          .flinkSchema(catalogTable.getSchema())
-          .build();
+      FlinkSink.forRowData(process.getSideOutput(p.getTag())).table(table).tableLoader(tableLoader)
+          .flinkSchema(catalogTable.getSchema()).build();
     });
   }
 

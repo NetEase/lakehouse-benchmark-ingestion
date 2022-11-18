@@ -139,9 +139,8 @@ public abstract class BaseCatalogSync implements Consumer<CallContext> {
   }
 
   public abstract void insertData(StreamTableEnvironment tableEnv,
-      SingleOutputStreamOperator<Void> process,
-      CatalogParams sourceCatalogParams, CatalogParams destCatalogParams,
-      List<Tuple2<ObjectPath, ResolvedCatalogTable>> s);
+      SingleOutputStreamOperator<Void> process, CatalogParams sourceCatalogParams,
+      CatalogParams destCatalogParams, List<Tuple2<ObjectPath, ResolvedCatalogTable>> s);
 
   public abstract void createTable(Catalog catalog, String dbName,
       List<Tuple2<ObjectPath, ResolvedCatalogTable>> pathAndTable)

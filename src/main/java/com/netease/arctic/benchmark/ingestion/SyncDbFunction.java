@@ -92,7 +92,7 @@ public class SyncDbFunction {
                 (RowType) e.f1.getResolvedSchema().toPhysicalRowDataType().getLogicalType())
             .setUserDefinedConverterFactory(MySqlDeserializationConverterFactory.instance())
             .setMetadataConverters(
-                new MetadataConverter[]{TABLE_NAME.getConverter(), DATABASE_NAME.getConverter()})
+                new MetadataConverter[] {TABLE_NAME.getConverter(), DATABASE_NAME.getConverter()})
             .setResultTypeInfo(TypeInformation.of(RowData.class)).build()));
   }
 
@@ -105,12 +105,11 @@ public class SyncDbFunction {
   public static List<SyncDBParams> getParamsList(final String mysqlDb,
       final List<Tuple2<ObjectPath, ResolvedCatalogTable>> pathAndTable) {
     return pathAndTable.stream().map(e -> {
-      final OutputTag<RowData> tag = new OutputTag<RowData>(e.f0.getFullName()) {
-      };
+      final OutputTag<RowData> tag = new OutputTag<RowData>(e.f0.getFullName()) {};
       final List<Field> fields = e.f1.getResolvedSchema().getColumns().stream()
           .map(c -> DataTypes.FIELD(c.getName(), c.getDataType())).collect(toList());
-      final Schema schema = Schema.newBuilder().fromResolvedSchema(e.f1.getResolvedSchema())
-          .build();
+      final Schema schema =
+          Schema.newBuilder().fromResolvedSchema(e.f1.getResolvedSchema()).build();
       return SyncDBParams.builder().table(e.f0.getObjectName())
           .path(new ObjectPath(mysqlDb, e.f0.getObjectName())).tag(tag).schema(schema).build();
     }).collect(toList());
@@ -173,7 +172,8 @@ public class SyncDbFunction {
         throws Exception {
       final String key = rowData.getString(rowData.getArity() - 1).toString() + "." +
           rowData.getString(rowData.getArity() - 2).toString();
-      ctx.output(new OutputTag<RowData>(key) {},getField(JoinedRowData.class,(JoinedRowData) rowData,"row1"));
+      ctx.output(new OutputTag<RowData>(key) {},
+          getField(JoinedRowData.class, (JoinedRowData) rowData, "row1"));
     }
 
     private static <O, V> V getField(Class<O> clazz, O obj, String fieldName) {

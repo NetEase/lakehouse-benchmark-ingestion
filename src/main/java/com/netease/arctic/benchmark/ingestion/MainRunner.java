@@ -86,11 +86,11 @@ public class MainRunner {
     createSinkCatalog(sinkType, props);
     call(sinkType, sinkDatabase, configuration, CallContext.builder()
         .args(ParameterTool.fromArgs(args)).env(env).tableEnv(tableEnv).build());
-//    try {
-//      env.execute();
-//    } catch (Exception e) {
-//      throw new RuntimeException(e);
-//    }
+    // try {
+    // env.execute();
+    // } catch (Exception e) {
+    // throw new RuntimeException(e);
+    // }
   }
 
   private static void call(String sinkType, String sinkDatabase, Configuration configuration,
