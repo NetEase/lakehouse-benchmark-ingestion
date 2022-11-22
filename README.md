@@ -70,5 +70,5 @@
 3. Hudi
 
 ## 相关说明
-* 本项目使用的arctic-flink-runtime-1.14依赖需要基于Arctic工程进行源码编译，请下载[Arctic工程](https://github.com/NetEase/arctic)的代码，然后切换到0.3.x分支，执行命令`mvn clean install -DskipTests`进行构建
+* 本项目使用的arctic-flink-runtime-1.14依赖需要基于Arctic工程进行源码编译，请下载[Arctic工程](https://github.com/NetEase/arctic)的代码，然后切换到master分支，执行命令`mvn clean install -DskipTests`进行构建
 * 本项目使用的hudi-flink1.14-bundle_2.12依赖需要基于Hudi工程进行源码编译，请下载[Hudi工程](https://github.com/apache/hudi)的代码，然后切换到release-0.11.1，执行命令`mvn clean install -DskipTests -Dflink1.14 -Dscala-2.12`进行构建
