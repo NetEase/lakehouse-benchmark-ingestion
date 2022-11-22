@@ -18,6 +18,7 @@
 package com.netease.arctic.benchmark.ingestion.sink;
 
 import com.netease.arctic.benchmark.ingestion.BaseCatalogSync;
+import com.netease.arctic.benchmark.ingestion.SyncDbFunction;
 import com.netease.arctic.benchmark.ingestion.params.catalog.CatalogParams;
 import com.netease.arctic.benchmark.ingestion.params.database.BaseParameters;
 import com.netease.arctic.benchmark.ingestion.params.table.IcebergParameters;
@@ -32,6 +33,13 @@ import org.apache.flink.table.catalog.exceptions.DatabaseAlreadyExistException;
 import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
 import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
 import org.apache.flink.table.catalog.exceptions.TableNotExistException;
+import org.apache.iceberg.Table;
+import org.apache.iceberg.catalog.Namespace;
+import org.apache.iceberg.catalog.TableIdentifier;
+import org.apache.iceberg.flink.CatalogLoader;
+import org.apache.iceberg.flink.FlinkCatalog;
+import org.apache.iceberg.flink.TableLoader;
+import org.apache.iceberg.flink.sink.FlinkSink;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +61,19 @@ public class IcebergCatalogSync extends BaseCatalogSync {
   public void insertData(StreamTableEnvironment tableEnv, SingleOutputStreamOperator<Void> process,
       CatalogParams sourceCatalogParams, CatalogParams destCatalogParams,
       List<Tuple2<ObjectPath, ResolvedCatalogTable>> s) {
+    FlinkCatalog catalog = (FlinkCatalog) destCatalogParams.getCatalog();
+    CatalogLoader catalogLoader = getField(FlinkCatalog.class, catalog, "catalogLoader");
+    org.apache.iceberg.catalog.Catalog loadCatalog = catalogLoader.loadCatalog();
+    SyncDbFunction.getParamsList(sourceCatalogParams.getDatabaseName(), s).forEach(p -> {
+      TableIdentifier identifier =
+          TableIdentifier.of(Namespace.of(destCatalogParams.getDatabaseName()), p.getTable());
+      Table table = loadCatalog.loadTable(identifier);
+      TableLoader tableLoader = TableLoader.fromCatalog(catalogLoader, identifier);
 
+      FlinkSink.forRowData(process.getSideOutput(p.getTag())).table(table).tableLoader(tableLoader)
+          .writeParallelism(4).append();
+
+    });
   }
 
   @Override
@@ -93,5 +113,16 @@ public class IcebergCatalogSync extends BaseCatalogSync {
 
   private void fillIcebergTableOptions(Map<String, String> options) {
     options.put("format-version", "2");
+  }
+
+  private static <O, V> V getField(Class<O> clazz, O obj, String fieldName) {
+    try {
+      java.lang.reflect.Field field = clazz.getDeclaredField(fieldName);
+      field.setAccessible(true);
+      Object v = field.get(obj);
+      return v == null ? null : (V) v;
+    } catch (NoSuchFieldException | IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

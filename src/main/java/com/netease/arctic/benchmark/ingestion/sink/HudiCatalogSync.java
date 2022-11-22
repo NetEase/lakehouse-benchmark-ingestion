@@ -18,10 +18,13 @@
 package com.netease.arctic.benchmark.ingestion.sink;
 
 import com.netease.arctic.benchmark.ingestion.BaseCatalogSync;
+import com.netease.arctic.benchmark.ingestion.SyncDbFunction;
 import com.netease.arctic.benchmark.ingestion.params.catalog.CatalogParams;
 import com.netease.arctic.benchmark.ingestion.params.database.BaseParameters;
 import com.netease.arctic.benchmark.ingestion.params.table.HudiParameters;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
@@ -32,6 +35,13 @@ import org.apache.flink.table.catalog.exceptions.DatabaseAlreadyExistException;
 import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
 import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
 import org.apache.flink.table.catalog.exceptions.TableNotExistException;
+import org.apache.flink.table.data.RowData;
+import org.apache.flink.table.types.logical.RowType;
+import org.apache.hudi.common.model.HoodieRecord;
+import org.apache.hudi.sink.utils.Pipelines;
+import org.apache.hudi.streamer.FlinkStreamerConfig;
+import org.apache.hudi.util.AvroSchemaConverter;
+import org.apache.hudi.util.StreamerUtil;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,5 +128,26 @@ public class HudiCatalogSync extends BaseCatalogSync {
       CatalogParams sourceCatalogParams, CatalogParams destCatalogParams,
       List<Tuple2<ObjectPath, ResolvedCatalogTable>> s) {
 
+    SyncDbFunction.getParamsList(sourceCatalogParams.getDatabaseName(), s).forEach(p -> {
+      DataStream<RowData> dataStream = process.getSideOutput(p.getTag());
+      final FlinkStreamerConfig cfg = new FlinkStreamerConfig();
+
+      // Read from kafka source
+      // todo
+      RowType rowType =
+          (RowType) AvroSchemaConverter.convertToDataType(StreamerUtil.getSourceSchema(cfg))
+              .getLogicalType();
+
+      Configuration conf = FlinkStreamerConfig.toFlinkConfig(cfg);
+      int parallelism = 4;
+
+      DataStream<HoodieRecord> hoodieRecordDataStream = Pipelines.bootstrap(conf, rowType, parallelism, dataStream);
+      DataStream<Object> pipeline = Pipelines.hoodieStreamWrite(conf, parallelism, hoodieRecordDataStream);
+      if (StreamerUtil.needsAsyncCompaction(conf)) {
+        Pipelines.compact(conf, pipeline);
+      } else {
+        Pipelines.clean(conf, pipeline);
+      }
+    });
   }
 }

@@ -18,10 +18,10 @@
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
     <package.final.name>lakehouse_benchmark_ingestion</package.final.name>
 
-    <flink.version>1.14.5</flink.version>
+    <flink.version>1.14.6</flink.version>
     <scala.binary.version>2.12</scala.binary.version>
     <iceberg.version>0.14.0</iceberg.version>
-    <arctic.version>0.3.2</arctic.version>
+    <arctic.version>0.4.0-SNAPSHOT</arctic.version>
     <hudi.version>0.11.1</hudi.version>
     <flink-connector-mysql-cdc.version>2.3.0</flink-connector-mysql-cdc.version>
     <lombok.version>1.18.20</lombok.version>
