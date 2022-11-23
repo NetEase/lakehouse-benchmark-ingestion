@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -66,20 +67,26 @@ public class MainRunner {
   public static void main(String[] args)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     Class.forName("com.mysql.jdbc.Driver");
+    System.setProperty("HADOOP_USER_NAME", "sloth");
 
     String[] params = parseParams(args);
-    String confDir = params[0];
+    // String confDir = params[0];
     String sinkType = params[1];
     String sinkDatabase = params[2];
     int restPort = Integer.parseInt(params[3]);
     Map<String, String> props = new HashMap<>();
-    Configuration configuration = loadConfiguration(confDir, props);
+    // String confDir = Objects.requireNonNull(MainRunner.class.getResource("/")).getPath();
+    // Configuration configuration = loadConfiguration(confDir, props);
+    Configuration configuration = loadYAMLResource(
+        MainRunner.class.getClassLoader().getResourceAsStream(EDUARD_CONF_FILENAME), props);
 
     BaseParameters baseParameters = new BaseParameters(configuration, sinkType, sinkDatabase);
 
     env = StreamExecutionEnvironment.getExecutionEnvironment(setFlinkConf(restPort));
     env.setStateBackend(new FsStateBackend("file:///tmp/benchmark-ingestion"));
     env.getCheckpointConfig().setCheckpointInterval(60 * 1000L);
+//    env.getCheckpointConfig().enableUnalignedCheckpoints();
+    env.getCheckpointConfig().setCheckpointTimeout(1200 * 1000L);
     env.getCheckpointConfig().setTolerableCheckpointFailureNumber(10);
     tableEnv = StreamTableEnvironment.create(env);
     createSourceCatalog(baseParameters.getSourceType(), baseParameters);
@@ -159,12 +166,12 @@ public class MainRunner {
           yamlConfigFile.getAbsolutePath() + ") does not exist.");
     }
 
-    Configuration configuration = loadYAMLResource(yamlConfigFile, props);
+    Configuration configuration = loadYAMLResource1(yamlConfigFile, props);
 
     return configuration;
   }
 
-  private static Configuration loadYAMLResource(File file, Map<String, String> props) {
+  private static Configuration loadYAMLResource1(File file, Map<String, String> props) {
     final Configuration config = new Configuration();
 
     try (BufferedReader reader =
@@ -207,9 +214,52 @@ public class MainRunner {
     return config;
   }
 
+  private static Configuration loadYAMLResource(InputStream inputStream,
+      Map<String, String> props) {
+    final Configuration config = new Configuration();
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+
+      String line;
+      int lineNo = 0;
+      while ((line = reader.readLine()) != null) {
+        lineNo++;
+        String[] comments = line.split("#", 2);
+        String conf = comments[0].trim();
+
+        if (conf.length() > 0) {
+          String[] kv = conf.split(": ", 2);
+
+          if (kv.length == 1) {
+            LOG.warn("Error while trying to split key and value in configuration file " +
+                EDUARD_CONF_FILENAME + ":" + lineNo + ": \"" + line + "\"");
+            continue;
+          }
+
+          String key = kv[0].trim();
+          String value = kv[1].trim();
+
+          if (key.length() == 0 || value.length() == 0) {
+            LOG.warn("Error after splitting key and value in configuration file " +
+                EDUARD_CONF_FILENAME + ":" + lineNo + ": \"" + line + "\"");
+            continue;
+          }
+
+          LOG.info("Loading configuration property: {}, {}", key, value);
+          config.setString(key, value);
+          props.put(key, value);
+        }
+      }
+    } catch (IOException e) {
+      throw new RuntimeException("Error parsing YAML configuration.", e);
+    }
+
+    return config;
+  }
+
   private static Configuration setFlinkConf(int restPort) {
     Configuration configuration = new Configuration();
     configuration.setInteger(RestOptions.PORT, restPort);
+    configuration.setString("execution.checkpointing.unaligned.forced", "true");
     return configuration;
   }
 

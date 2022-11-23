@@ -122,5 +122,6 @@ public class ArcticCatalogSync extends BaseCatalogSync {
 
   private void fillArcticTableOptions(Map<String, String> options) {
     options.put("optimize.group", arcticParameters.getOptimizeGroupName());
+    options.put("write.upsert.enabled", "true");
   }
 }

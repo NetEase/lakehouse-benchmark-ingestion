@@ -71,8 +71,7 @@ public class IcebergCatalogSync extends BaseCatalogSync {
       TableLoader tableLoader = TableLoader.fromCatalog(catalogLoader, identifier);
 
       FlinkSink.forRowData(process.getSideOutput(p.getTag())).table(table).tableLoader(tableLoader)
-          .writeParallelism(4).append();
-
+          .writeParallelism(8).append();
     });
   }
 
@@ -113,6 +112,7 @@ public class IcebergCatalogSync extends BaseCatalogSync {
 
   private void fillIcebergTableOptions(Map<String, String> options) {
     options.put("format-version", "2");
+    options.put("write.metadata.metrics.default", "full");
   }
 
   private static <O, V> V getField(Class<O> clazz, O obj, String fieldName) {

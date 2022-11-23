@@ -110,8 +110,11 @@ public class SyncDbFunction {
           .map(c -> DataTypes.FIELD(c.getName(), c.getDataType())).collect(toList());
       final Schema schema =
           Schema.newBuilder().fromResolvedSchema(e.f1.getResolvedSchema()).build();
+      final RowType rowType =
+          (RowType) e.f1.getResolvedSchema().toPhysicalRowDataType().getLogicalType();
       return SyncDBParams.builder().table(e.f0.getObjectName())
-          .path(new ObjectPath(mysqlDb, e.f0.getObjectName())).tag(tag).schema(schema).build();
+          .path(new ObjectPath(mysqlDb, e.f0.getObjectName())).tag(tag).schema(schema)
+          .rowType(rowType).primaryKeys(e.f1.getPartitionKeys()).build();
     }).collect(toList());
   }
 

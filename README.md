@@ -60,6 +60,8 @@
 | hudi.compaction.tasks                 | 否    | 4             | 在线 compaction 的并行度                       |
 | hudi.compaction.trigger.strategy      | 否    | num_or_time   | 压缩策略                                     |
 
+## 需要的环境
+1. hadoop，
 
 ## 已支持的数据库与数据湖Format
 ### 源端数据库

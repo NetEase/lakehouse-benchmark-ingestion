@@ -118,7 +118,7 @@ public abstract class BaseCatalogSync implements Consumer<CallContext> {
     return env.fromSource(source, WatermarkStrategy.noWatermarks(), "mysql").uid("mysql")
         .setParallelism(baseParameters.getSourceParallelism())
         .process(new RowDataVoidProcessFunction(SyncDbFunction.getConverters(s)))
-        .uid("split stream").name("split stream").setParallelism(4);
+        .uid("split stream").name("split stream").setParallelism(8);
   }
 
   private List<String> getSyncTableList(MysqlCDCCatalog mysqlCdcCatalog, String sourceDatabaseName,

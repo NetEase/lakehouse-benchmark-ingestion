@@ -32,6 +32,10 @@ public class HudiParameters {
     this.eduardConfig = Preconditions.checkNotNull(eduardConfig);
   }
 
+  public String getCatalogPath() {
+    return eduardConfig.getString(HudiConfigOptions.HUDI_CATALOG_PATH);
+  }
+
   public boolean getHiveSyncEnable() {
     return eduardConfig.getBoolean(HudiConfigOptions.HUDI_HIVE_SYNC_ENABLE);
   }

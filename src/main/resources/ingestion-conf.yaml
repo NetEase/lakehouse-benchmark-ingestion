@@ -1,6 +1,6 @@
 #请填写source端数据库的连接信息
 source.type: mysql
-source.database.name: iceberg10w
+source.database.name: test2w
 source.username: rds
 source.password: 123456
 source.hostname: sloth-commerce-test2.jd.163.org
@@ -9,11 +9,11 @@ source.port: 3332
 #读取source端数据的可选配置项
 source.table.name: *
 source.scan.startup.mode: initial
-#source.parallelism: 4
+source.parallelism: 8
 
 #根据选择的sink端数据湖format的类型，填写相应信息
 #如果你选择了Arctic，请填写以下信息
-arctic.metastore.url: thrift://10.196.98.23:18112/trino_online_env
+arctic.metastore.url: thrift://10.196.98.23:1260/arctic-benchmark
 ##Arctic相关的可选配置项
 arctic.optimize.group.name: iceberg_optimize
 

@@ -21,6 +21,7 @@ import com.netease.arctic.benchmark.ingestion.BaseCatalogSync;
 import com.netease.arctic.benchmark.ingestion.SyncDbFunction;
 import com.netease.arctic.benchmark.ingestion.params.catalog.CatalogParams;
 import com.netease.arctic.benchmark.ingestion.params.database.BaseParameters;
+import com.netease.arctic.benchmark.ingestion.params.database.SyncDBParams;
 import com.netease.arctic.benchmark.ingestion.params.table.HudiParameters;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
@@ -38,8 +39,9 @@ import org.apache.flink.table.catalog.exceptions.TableNotExistException;
 import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.types.logical.RowType;
 import org.apache.hudi.common.model.HoodieRecord;
+import org.apache.hudi.common.model.HoodieTableType;
+import org.apache.hudi.configuration.FlinkOptions;
 import org.apache.hudi.sink.utils.Pipelines;
-import org.apache.hudi.streamer.FlinkStreamerConfig;
 import org.apache.hudi.util.AvroSchemaConverter;
 import org.apache.hudi.util.StreamerUtil;
 import java.util.HashMap;
@@ -117,8 +119,8 @@ public class HudiCatalogSync extends BaseCatalogSync {
 
     options.put("compaction.trigger.strategy", hudiParameters.getCompactionStrategy());
     options.put("compaction.tasks", hudiParameters.getCompactionTasks() + "");
-    options.put("compaction.delta_commits", "5");
-    options.put("compaction.delta_seconds", "300");
+    options.put("compaction.delta_commits", "1");
+    options.put("compaction.delta_seconds", "120");
     options.put("compaction.max_memory", "1024");
     options.put("hoodie.embed.timeline.server", "false");
   }
@@ -127,27 +129,50 @@ public class HudiCatalogSync extends BaseCatalogSync {
   public void insertData(StreamTableEnvironment tableEnv, SingleOutputStreamOperator<Void> process,
       CatalogParams sourceCatalogParams, CatalogParams destCatalogParams,
       List<Tuple2<ObjectPath, ResolvedCatalogTable>> s) {
+    int parallelism = 4;
 
     SyncDbFunction.getParamsList(sourceCatalogParams.getDatabaseName(), s).forEach(p -> {
       DataStream<RowData> dataStream = process.getSideOutput(p.getTag());
-      final FlinkStreamerConfig cfg = new FlinkStreamerConfig();
-
-      // Read from kafka source
-      // todo
+      // final FlinkStreamerConfig cfg = new FlinkStreamerConfig();
+      Configuration conf = buildConfiguration(p, destCatalogParams);
       RowType rowType =
-          (RowType) AvroSchemaConverter.convertToDataType(StreamerUtil.getSourceSchema(cfg))
+          (RowType) AvroSchemaConverter.convertToDataType(StreamerUtil.getSourceSchema(conf))
               .getLogicalType();
 
-      Configuration conf = FlinkStreamerConfig.toFlinkConfig(cfg);
-      int parallelism = 4;
-
-      DataStream<HoodieRecord> hoodieRecordDataStream = Pipelines.bootstrap(conf, rowType, parallelism, dataStream);
-      DataStream<Object> pipeline = Pipelines.hoodieStreamWrite(conf, parallelism, hoodieRecordDataStream);
-      if (StreamerUtil.needsAsyncCompaction(conf)) {
+      DataStream<HoodieRecord> hoodieRecordDataStream =
+          Pipelines.bootstrap(conf, rowType, parallelism, dataStream);
+      DataStream<Object> pipeline =
+          Pipelines.hoodieStreamWrite(conf, parallelism, hoodieRecordDataStream);
+//      if (StreamerUtil.needsAsyncCompaction(conf)) {
         Pipelines.compact(conf, pipeline);
-      } else {
-        Pipelines.clean(conf, pipeline);
-      }
+//      } else {
+//      Pipelines.clean(conf, pipeline);
+//      }
     });
+  }
+
+  private Configuration buildConfiguration(SyncDBParams syncDBParams,
+      CatalogParams destCatalogParams) {
+    Configuration conf = new Configuration();
+    conf.setString(FlinkOptions.TABLE_NAME, syncDBParams.getTable());
+    conf.setString(FlinkOptions.PATH,
+        hudiParameters.getCatalogPath() + "/" + destCatalogParams.getDatabaseName() + "/"
+            + syncDBParams.getTable());
+
+    conf.setString(FlinkOptions.INDEX_TYPE, "BUCKET");
+    conf.setInteger(FlinkOptions.BUCKET_INDEX_NUM_BUCKETS, 8);
+    conf.setString(FlinkOptions.INDEX_KEY_FIELD, syncDBParams.getSchema().getPrimaryKey()
+        .orElseThrow(() -> new RuntimeException(syncDBParams.getTable() + "no pk "))
+        .getColumnNames().get(0));
+    conf.setString(FlinkOptions.RECORD_KEY_FIELD, syncDBParams.getSchema().getPrimaryKey()
+        .orElseThrow(() -> new RuntimeException(syncDBParams.getTable() + "no pk "))
+        .getColumnNames().get(0));
+    conf.setString(FlinkOptions.PRECOMBINE_FIELD, FlinkOptions.NO_PRE_COMBINE);
+    conf.setInteger(FlinkOptions.COMPACTION_DELTA_COMMITS, 1);
+    conf.setString(FlinkOptions.TABLE_TYPE, HoodieTableType.MERGE_ON_READ.name());
+    String inferredSchema = AvroSchemaConverter.convertToSchema(syncDBParams.getRowType())
+        .toString();
+    conf.setString(FlinkOptions.SOURCE_AVRO_SCHEMA, inferredSchema);
+    return conf;
   }
 }
