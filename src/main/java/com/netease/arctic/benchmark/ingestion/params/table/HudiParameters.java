@@ -29,6 +29,8 @@ public class HudiParameters {
   protected final Configuration eduardConfig;
 
   public static final int DEFAULT_BUCKET_ASSIGN_TASK = 4;
+  public static final int DEFAULT_BUCKET_INDEX_NUM_BUCKETS = 8;
+  public static final int DEFAULT_PARALLELISM = 4;
 
   public HudiParameters(Configuration eduardConfig) {
     this.eduardConfig = Preconditions.checkNotNull(eduardConfig);

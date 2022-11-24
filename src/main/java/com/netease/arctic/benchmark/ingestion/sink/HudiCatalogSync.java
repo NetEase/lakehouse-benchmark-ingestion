@@ -72,9 +72,9 @@ public class HudiCatalogSync extends BaseCatalogSync {
       }
     }
 
+    final Map<String, String> options = new HashMap<>();
     final String HIVE_META_STORE_URI = hudiParameters.getHiveMetastoreUri();
     boolean isHiveSync = hudiParameters.getHiveSyncEnable();
-    final Map<String, String> options = new HashMap<>();
     if (isHiveSync) {
       options.put("hive_sync.metastore.uris", HIVE_META_STORE_URI);
     }
@@ -99,6 +99,26 @@ public class HudiCatalogSync extends BaseCatalogSync {
     });
   }
 
+  @Override
+  public void insertData(StreamTableEnvironment tableEnv, SingleOutputStreamOperator<Void> process,
+      CatalogParams sourceCatalogParams, CatalogParams destCatalogParams,
+      List<Tuple2<ObjectPath, ResolvedCatalogTable>> s) {
+    int defaultParallelism = HudiParameters.DEFAULT_PARALLELISM;
+
+    SyncDbFunction.getParamsList(sourceCatalogParams.getDatabaseName(), s).forEach(p -> {
+      DataStream<RowData> dataStream = process.getSideOutput(p.getTag());
+      Configuration conf = buildConfiguration(p, destCatalogParams);
+      RowType rowType = (RowType) AvroSchemaConverter
+          .convertToDataType(StreamerUtil.getSourceSchema(conf)).getLogicalType();
+
+      DataStream<HoodieRecord> hoodieRecordDataStream =
+          Pipelines.bootstrap(conf, rowType, defaultParallelism, dataStream);
+      DataStream<Object> pipeline =
+          Pipelines.hoodieStreamWrite(conf, defaultParallelism, hoodieRecordDataStream);
+      Pipelines.compact(conf, pipeline);
+    });
+  }
+
   private void fillHudiTableOptions(Map<String, String> options, boolean isHiveSync, String dbName,
       String tableName) {
     if (isHiveSync) {
@@ -109,43 +129,16 @@ public class HudiCatalogSync extends BaseCatalogSync {
       options.put("hive_sync.support_timestamp", "true");
     }
     options.put("table.type", hudiParameters.getTableType());
-    // options.put("read.tasks", hudiParameters.getReadTasks() + "");
-    // options.put("write.tasks", hudiParameters.getWriteTasks() + "");
-    // options.put("write.bucket_assign.tasks", "2");
-    // options.put("write.batch.size", "128");
-    //
-    // options.put("compaction.trigger.strategy", hudiParameters.getCompactionStrategy());
-    // options.put("compaction.tasks", hudiParameters.getCompactionTasks() + "");
-    // options.put("compaction.delta_commits", "1");
-    // options.put("compaction.delta_seconds", "120");
-    // options.put("compaction.max_memory", "1024");
-    // options.put("hoodie.embed.timeline.server", "false");
-  }
-
-  @Override
-  public void insertData(StreamTableEnvironment tableEnv, SingleOutputStreamOperator<Void> process,
-      CatalogParams sourceCatalogParams, CatalogParams destCatalogParams,
-      List<Tuple2<ObjectPath, ResolvedCatalogTable>> s) {
-    int parallelism = 4;
-
-    SyncDbFunction.getParamsList(sourceCatalogParams.getDatabaseName(), s).forEach(p -> {
-      DataStream<RowData> dataStream = process.getSideOutput(p.getTag());
-      Configuration conf = buildConfiguration(p, destCatalogParams);
-      RowType rowType = (RowType) AvroSchemaConverter
-          .convertToDataType(StreamerUtil.getSourceSchema(conf)).getLogicalType();
-
-      DataStream<HoodieRecord> hoodieRecordDataStream =
-          Pipelines.bootstrap(conf, rowType, parallelism, dataStream);
-      DataStream<Object> pipeline =
-          Pipelines.hoodieStreamWrite(conf, parallelism, hoodieRecordDataStream);
-      Pipelines.compact(conf, pipeline);
-    });
   }
 
   private Configuration buildConfiguration(SyncDBParams syncDBParams,
       CatalogParams destCatalogParams) {
     Configuration conf = new Configuration();
 
+    final String HIVE_META_STORE_URI = hudiParameters.getHiveMetastoreUri();
+    boolean isHiveSync = hudiParameters.getHiveSyncEnable();
+
+    // table message options
     conf.setString(FlinkOptions.TABLE_NAME, syncDBParams.getTable());
     conf.setString(FlinkOptions.PATH, hudiParameters.getCatalogPath() + "/" +
         destCatalogParams.getDatabaseName() + "/" + syncDBParams.getTable());
@@ -155,7 +148,8 @@ public class HudiCatalogSync extends BaseCatalogSync {
     conf.setString(FlinkOptions.SOURCE_AVRO_SCHEMA, inferredSchema);
 
     conf.setString(FlinkOptions.INDEX_TYPE, "BUCKET");
-    conf.setInteger(FlinkOptions.BUCKET_INDEX_NUM_BUCKETS, 8);
+    conf.setInteger(FlinkOptions.BUCKET_INDEX_NUM_BUCKETS,
+        HudiParameters.DEFAULT_BUCKET_INDEX_NUM_BUCKETS);
     conf.setString(FlinkOptions.INDEX_KEY_FIELD,
         syncDBParams.getSchema().getPrimaryKey()
             .orElseThrow(() -> new RuntimeException(syncDBParams.getTable() + "no pk "))
@@ -176,6 +170,17 @@ public class HudiCatalogSync extends BaseCatalogSync {
     conf.setInteger(FlinkOptions.COMPACTION_DELTA_COMMITS, 1);
     conf.setInteger(FlinkOptions.COMPACTION_DELTA_SECONDS, 120);
     conf.setInteger(FlinkOptions.COMPACTION_TASKS, hudiParameters.getCompactionTasks());
+
+    // hive sync options
+    conf.setBoolean(FlinkOptions.HIVE_SYNC_ENABLED, hudiParameters.getHiveSyncEnable());
+
+    if (isHiveSync) {
+      conf.setString(FlinkOptions.HIVE_SYNC_METASTORE_URIS, HIVE_META_STORE_URI);
+      conf.setString(FlinkOptions.HIVE_SYNC_MODE, "hms");
+      conf.setString(FlinkOptions.HIVE_SYNC_DB, destCatalogParams.getDatabaseName());
+      conf.setString(FlinkOptions.HIVE_SYNC_TABLE, syncDBParams.getTable());
+      conf.setBoolean(FlinkOptions.HIVE_SYNC_SUPPORT_TIMESTAMP, true);
+    }
 
     return conf;
   }

@@ -83,9 +83,7 @@ public class ArcticCatalogSync extends BaseCatalogSync {
         }
         arctic.createTable(objectPath,
             new ResolvedCatalogTable(e.f1.copy(options), e.f1.getResolvedSchema()), false);
-      } catch (TableAlreadyExistException ex) {
-        ex.printStackTrace();
-      } catch (DatabaseNotExistException ex) {
+      } catch (TableAlreadyExistException | DatabaseNotExistException ex) {
         ex.printStackTrace();
       } catch (TableNotExistException ex) {
         throw new RuntimeException(ex);
@@ -121,7 +119,10 @@ public class ArcticCatalogSync extends BaseCatalogSync {
   }
 
   private void fillArcticTableOptions(Map<String, String> options) {
-    options.put("optimize.group", arcticParameters.getOptimizeGroupName());
+    if (arcticParameters.getOptimizeEnable()) {
+      options.put("optimize.group", arcticParameters.getOptimizeGroupName());
+    }
+    options.put("sink.parallelism", arcticParameters.getSinkParallelism() + "");
     options.put("write.upsert.enabled", "true");
   }
 }

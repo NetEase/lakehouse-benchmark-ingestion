@@ -70,16 +70,12 @@ public class MainRunner {
     System.setProperty("HADOOP_USER_NAME", "sloth");
 
     String[] params = parseParams(args);
-    // String confDir = params[0];
+    String confDir = params[0];
     String sinkType = params[1];
     String sinkDatabase = params[2];
     int restPort = Integer.parseInt(params[3]);
     Map<String, String> props = new HashMap<>();
-    // String confDir = Objects.requireNonNull(MainRunner.class.getResource("/")).getPath();
-    // Configuration configuration = loadConfiguration(confDir, props);
-    Configuration configuration = loadYAMLResource(
-        MainRunner.class.getClassLoader().getResourceAsStream(EDUARD_CONF_FILENAME), props);
-
+    Configuration configuration = loadConfiguration(confDir, props);
     BaseParameters baseParameters = new BaseParameters(configuration, sinkType, sinkDatabase);
 
     env = StreamExecutionEnvironment.getExecutionEnvironment(setFlinkConf(restPort));
@@ -165,12 +161,10 @@ public class MainRunner {
           yamlConfigFile.getAbsolutePath() + ") does not exist.");
     }
 
-    Configuration configuration = loadYAMLResource1(yamlConfigFile, props);
-
-    return configuration;
+    return loadYAMLResource(yamlConfigFile, props);
   }
 
-  private static Configuration loadYAMLResource1(File file, Map<String, String> props) {
+  private static Configuration loadYAMLResource(File file, Map<String, String> props) {
     final Configuration config = new Configuration();
 
     try (BufferedReader reader =

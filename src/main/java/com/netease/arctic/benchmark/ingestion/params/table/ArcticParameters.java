@@ -37,7 +37,15 @@ public class ArcticParameters {
     return eduardConfig.getString(ArcticConfigOptions.ARCTIC_METASTORE_URL);
   }
 
+  public boolean getOptimizeEnable() {
+    return eduardConfig.getBoolean(ArcticConfigOptions.ARCTIC_OPTIMIZE_ENABLE);
+  }
+
   public String getOptimizeGroupName() {
     return eduardConfig.getString(ArcticConfigOptions.ARCTIC_OPTIMIZE_GROUP_NAME);
+  }
+
+  public int getSinkParallelism() {
+    return eduardConfig.getInteger(ArcticConfigOptions.ARCTIC_SINK_PARALLELISM);
   }
 }

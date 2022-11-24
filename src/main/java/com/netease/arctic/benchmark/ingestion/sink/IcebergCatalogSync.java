@@ -71,7 +71,7 @@ public class IcebergCatalogSync extends BaseCatalogSync {
       TableLoader tableLoader = TableLoader.fromCatalog(catalogLoader, identifier);
 
       FlinkSink.forRowData(process.getSideOutput(p.getTag())).table(table).tableLoader(tableLoader)
-          .writeParallelism(8).append();
+          .writeParallelism(icebergParameters.getSinkParallelism()).append();
     });
   }
 
@@ -100,9 +100,7 @@ public class IcebergCatalogSync extends BaseCatalogSync {
         }
         iceberg.createTable(objectPath,
             new ResolvedCatalogTable(e.f1.copy(options), e.f1.getResolvedSchema()), false);
-      } catch (TableAlreadyExistException ex) {
-        ex.printStackTrace();
-      } catch (DatabaseNotExistException ex) {
+      } catch (TableAlreadyExistException | DatabaseNotExistException ex) {
         ex.printStackTrace();
       } catch (TableNotExistException ex) {
         throw new RuntimeException(ex);

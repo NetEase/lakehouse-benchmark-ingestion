@@ -37,6 +37,7 @@ import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
 import org.apache.flink.table.data.RowData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -82,9 +83,13 @@ public abstract class BaseCatalogSync implements Consumer<CallContext> {
       if (baseParameters.getSourceScanStartupMode().equals("initial")) {
         createTable(destCatalog, destCatalogParams.getDatabaseName(), pathAndTable);
       }
+      String timeZone = baseParameters.getSourceServerTimeZone();
+      if (timeZone.isEmpty()) {
+        timeZone = ZoneId.systemDefault().getId();
+      }
       source = SyncDbFunction.getMySqlSource(mysqlCdcCatalog, sourceDatabaseName, syncTableList,
           SyncDbFunction.getDebeziumDeserializeSchemas(pathAndTable),
-          baseParameters.getSourceScanStartupMode());
+          baseParameters.getSourceScanStartupMode(), timeZone);
     } catch (DatabaseAlreadyExistException | DatabaseNotExistException e) {
       throw new RuntimeException(e);
     }

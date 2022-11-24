@@ -44,6 +44,9 @@ public class IcebergConfigOptions {
   public static final ConfigOption<String> ICEBERG_CATALOG_TYPE =
       ConfigOptions.key("iceberg.catalog.type").stringType().defaultValue("hive");
 
+  public static final ConfigOption<Integer> ICEBERG_SINK_PARALLELISM =
+      ConfigOptions.key("iceberg.sink.parallelism").intType().defaultValue(4);
+
   public static void fillRequiredOptions(Map<String, String> props) {
     props.put("type", TYPE);
     props.put("property-version", PROPERTY_VERSION + "");

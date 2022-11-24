@@ -33,8 +33,14 @@ public class ArcticConfigOptions {
   public static final ConfigOption<String> ARCTIC_METASTORE_URL =
       ConfigOptions.key("arctic.metastore.url").stringType().noDefaultValue();
 
+  public static final ConfigOption<Boolean> ARCTIC_OPTIMIZE_ENABLE =
+      ConfigOptions.key("arctic.optimize.enable").booleanType().defaultValue(true);
+
   public static final ConfigOption<String> ARCTIC_OPTIMIZE_GROUP_NAME =
       ConfigOptions.key("arctic.optimize.group.name").stringType().defaultValue("default");
+
+  public static final ConfigOption<Integer> ARCTIC_SINK_PARALLELISM =
+      ConfigOptions.key("arctic.sink.parallelism").intType().defaultValue(4);
 
   public static void fillRequiredOptions(Map<String, String> props) {
     props.put("type", TYPE);

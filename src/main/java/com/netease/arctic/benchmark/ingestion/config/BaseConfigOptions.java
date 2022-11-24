@@ -49,10 +49,9 @@ public class BaseConfigOptions {
   public static final ConfigOption<String> SOURCE_SCAN_STARTUP_MODE =
       ConfigOptions.key("source.scan.startup.mode").stringType().defaultValue("initial");
 
+  public static final ConfigOption<String> SOURCE_SERVER_TIME_ZONE =
+      ConfigOptions.key("source.server.timezone").stringType().defaultValue("");
+
   public static final ConfigOption<Integer> SOURCE_PARALLELISM =
       ConfigOptions.key("source.parallelism").intType().defaultValue(4);
-
-  public static final ConfigOption<Integer> SINK_PARALLELISM =
-      ConfigOptions.key("sink.parallelism").intType().defaultValue(4);
-
 }

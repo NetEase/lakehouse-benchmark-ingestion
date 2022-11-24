@@ -31,6 +31,7 @@
 | source.port              | 是    | (none)  | 源端数据库端口                                                       |
 | source.table.name        | 否    | *       | 指定需要同步的表名称，支持指定多张表，默认情况下同步整个数据库                               |
 | source.scan.startup.mode | 否    | initial | MySQL CDC connector 消费 binlog 时的启动模式，支持 initial/latest-offset |
+| source.server.timezone   | 否    | (none)  | MySQL数据库服务器的会话时区                                              |
 | source.parallelism       | 否    | 4       | 读取源端数据时的任务并行度                                                 |      |         |                                                       |
 
 **Arctic相关**
@@ -38,15 +39,18 @@
 | 参数项                        | 是否必须 | 默认值     | 描述                        |
 |----------------------------|------|---------|---------------------------|
 | arctic.metastore.url       | 是    | (none)  | Arctic metastore 的 URL 地址 |
+| arctic.optimize.enable     | 是    | true    | 是否开启Arctic Optimize       |
 | arctic.optimize.group.name | 否    | default | Arctic Optimizer 资源组      |
+| arctic.sink.parallelism    | 否    | 4       | Arctic Writer的并发度         |
  
 **Iceberg相关**
 
-| 参数项                  | 是否必须 | 默认值    | 描述                                 |
-|----------------------|------|--------|------------------------------------|
-| iceberg.uri          | 是    | (none) | Hive metastore 的thrift URI         |
-| iceberg.warehouse    | 是    | (none) | Hive warehouse 的地址                 |
-| iceberg.catalog-type | 否    | hive   | Iceberg catalog 的类型，支持 hive/hadoop |
+| 参数项                      | 是否必须 | 默认值    | 描述                                 |
+|--------------------------|------|--------|------------------------------------|
+| iceberg.uri              | 是    | (none) | Hive metastore 的thrift URI         |
+| iceberg.warehouse        | 是    | (none) | Hive warehouse 的地址                 |
+| iceberg.catalog-type     | 否    | hive   | Iceberg catalog 的类型，支持 hive/hadoop |
+| iceberg.sink.parallelism | 否    | 4      | Iceberg Writer的并发度                 |
 
 **Hudi相关**
 
@@ -60,16 +64,14 @@
 | hudi.compaction.tasks                 | 否    | 4             | 在线 compaction 的并行度                       |
 | hudi.compaction.trigger.strategy      | 否    | num_or_time   | 压缩策略                                     |
 
-## 需要的环境
-1. hadoop，
 
 ## 已支持的数据库与数据湖Format
 ### 源端数据库
-1. MySQL
+1. [MySQL](https://www.mysql.com/)
 ### 目标端数据湖Format
-1. Arctic
-2. Iceberg
-3. Hudi
+1. [Arctic](https://arctic.netease.com/ch/)
+2. [Iceberg](https://iceberg.apache.org/)
+3. [Hudi](https://hudi.apache.org/cn/)
 
 ## 相关说明
 * 本项目使用的arctic-flink-runtime-1.14依赖需要基于Arctic工程进行源码编译，请下载[Arctic工程](https://github.com/NetEase/arctic)的代码，然后切换到master分支，执行命令`mvn clean install -DskipTests`进行构建

@@ -77,16 +77,16 @@ public class BaseParameters {
     return eduardConfig.getString(BaseConfigOptions.SOURCE_TABLE_NAME);
   }
 
+  public String getSourceServerTimeZone() {
+    return eduardConfig.getString(BaseConfigOptions.SOURCE_SERVER_TIME_ZONE);
+  }
+
   public String getSourceScanStartupMode() {
     return eduardConfig.getString(BaseConfigOptions.SOURCE_SCAN_STARTUP_MODE);
   }
 
   public int getSourceParallelism() {
     return eduardConfig.getInteger(BaseConfigOptions.SOURCE_PARALLELISM);
-  }
-
-  public int getSinkParallelism() {
-    return eduardConfig.getInteger(BaseConfigOptions.SINK_PARALLELISM);
   }
 
 }

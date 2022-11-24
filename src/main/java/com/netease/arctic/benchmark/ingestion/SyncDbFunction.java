@@ -76,11 +76,12 @@ public class SyncDbFunction {
 
   public static MySqlSource<RowData> getMySqlSource(final MysqlCDCCatalog mysql,
       final String srcCatalogDb, List<String> tableList,
-      final Map<String, RowDataDebeziumDeserializeSchema> maps, String startUpMode) {
+      final Map<String, RowDataDebeziumDeserializeSchema> maps, String startUpMode,
+      String timeZone) {
     return MySqlSource.<RowData>builder().hostname(mysql.getHostname()).port(mysql.getPort())
         .username(mysql.getUsername()).password(mysql.getPassword()).databaseList(srcCatalogDb)
         .tableList(tableList.stream().map(e -> srcCatalogDb + "." + e).toArray(String[]::new))
-        .startupOptions(getStartUpMode(startUpMode))
+        .startupOptions(getStartUpMode(startUpMode)).serverTimeZone(timeZone)
         .deserializer(new CompositeDebeziuDeserializationSchema(maps)).build();
   }
 

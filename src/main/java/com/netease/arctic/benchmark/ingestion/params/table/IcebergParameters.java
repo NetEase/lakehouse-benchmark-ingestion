@@ -17,6 +17,7 @@
 
 package com.netease.arctic.benchmark.ingestion.params.table;
 
+import com.netease.arctic.benchmark.ingestion.config.IcebergConfigOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Preconditions;
 
@@ -31,8 +32,8 @@ public class IcebergParameters {
     this.eduardConfig = Preconditions.checkNotNull(eduardConfig);
   }
 
-  public Configuration getEduardConfig() {
-    return eduardConfig;
+  public int getSinkParallelism() {
+    return eduardConfig.getInteger(IcebergConfigOptions.ICEBERG_SINK_PARALLELISM);
   }
 
 }
