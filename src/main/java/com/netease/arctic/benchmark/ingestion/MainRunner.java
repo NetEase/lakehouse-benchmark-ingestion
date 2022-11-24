@@ -85,7 +85,6 @@ public class MainRunner {
     env = StreamExecutionEnvironment.getExecutionEnvironment(setFlinkConf(restPort));
     env.setStateBackend(new FsStateBackend("file:///tmp/benchmark-ingestion"));
     env.getCheckpointConfig().setCheckpointInterval(60 * 1000L);
-//    env.getCheckpointConfig().enableUnalignedCheckpoints();
     env.getCheckpointConfig().setCheckpointTimeout(1200 * 1000L);
     env.getCheckpointConfig().setTolerableCheckpointFailureNumber(10);
     tableEnv = StreamTableEnvironment.create(env);

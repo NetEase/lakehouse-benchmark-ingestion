@@ -28,6 +28,8 @@ public class HudiParameters {
 
   protected final Configuration eduardConfig;
 
+  public static final int DEFAULT_BUCKET_ASSIGN_TASK = 4;
+
   public HudiParameters(Configuration eduardConfig) {
     this.eduardConfig = Preconditions.checkNotNull(eduardConfig);
   }

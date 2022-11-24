@@ -39,7 +39,6 @@ import org.apache.flink.table.catalog.exceptions.TableNotExistException;
 import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.types.logical.RowType;
 import org.apache.hudi.common.model.HoodieRecord;
-import org.apache.hudi.common.model.HoodieTableType;
 import org.apache.hudi.configuration.FlinkOptions;
 import org.apache.hudi.sink.utils.Pipelines;
 import org.apache.hudi.util.AvroSchemaConverter;
@@ -109,20 +108,18 @@ public class HudiCatalogSync extends BaseCatalogSync {
       options.put("hive_sync.table", tableName);
       options.put("hive_sync.support_timestamp", "true");
     }
-
-    options.put("compaction.async.enabled", "false");
     options.put("table.type", hudiParameters.getTableType());
-    options.put("read.tasks", hudiParameters.getReadTasks() + "");
-    options.put("write.tasks", hudiParameters.getWriteTasks() + "");
-    options.put("write.bucket_assign.tasks", "2");
-    options.put("write.batch.size", "128");
-
-    options.put("compaction.trigger.strategy", hudiParameters.getCompactionStrategy());
-    options.put("compaction.tasks", hudiParameters.getCompactionTasks() + "");
-    options.put("compaction.delta_commits", "1");
-    options.put("compaction.delta_seconds", "120");
-    options.put("compaction.max_memory", "1024");
-    options.put("hoodie.embed.timeline.server", "false");
+    // options.put("read.tasks", hudiParameters.getReadTasks() + "");
+    // options.put("write.tasks", hudiParameters.getWriteTasks() + "");
+    // options.put("write.bucket_assign.tasks", "2");
+    // options.put("write.batch.size", "128");
+    //
+    // options.put("compaction.trigger.strategy", hudiParameters.getCompactionStrategy());
+    // options.put("compaction.tasks", hudiParameters.getCompactionTasks() + "");
+    // options.put("compaction.delta_commits", "1");
+    // options.put("compaction.delta_seconds", "120");
+    // options.put("compaction.max_memory", "1024");
+    // options.put("hoodie.embed.timeline.server", "false");
   }
 
   @Override
@@ -133,46 +130,53 @@ public class HudiCatalogSync extends BaseCatalogSync {
 
     SyncDbFunction.getParamsList(sourceCatalogParams.getDatabaseName(), s).forEach(p -> {
       DataStream<RowData> dataStream = process.getSideOutput(p.getTag());
-      // final FlinkStreamerConfig cfg = new FlinkStreamerConfig();
       Configuration conf = buildConfiguration(p, destCatalogParams);
-      RowType rowType =
-          (RowType) AvroSchemaConverter.convertToDataType(StreamerUtil.getSourceSchema(conf))
-              .getLogicalType();
+      RowType rowType = (RowType) AvroSchemaConverter
+          .convertToDataType(StreamerUtil.getSourceSchema(conf)).getLogicalType();
 
       DataStream<HoodieRecord> hoodieRecordDataStream =
           Pipelines.bootstrap(conf, rowType, parallelism, dataStream);
       DataStream<Object> pipeline =
           Pipelines.hoodieStreamWrite(conf, parallelism, hoodieRecordDataStream);
-//      if (StreamerUtil.needsAsyncCompaction(conf)) {
-        Pipelines.compact(conf, pipeline);
-//      } else {
-//      Pipelines.clean(conf, pipeline);
-//      }
+      Pipelines.compact(conf, pipeline);
     });
   }
 
   private Configuration buildConfiguration(SyncDBParams syncDBParams,
       CatalogParams destCatalogParams) {
     Configuration conf = new Configuration();
+
     conf.setString(FlinkOptions.TABLE_NAME, syncDBParams.getTable());
-    conf.setString(FlinkOptions.PATH,
-        hudiParameters.getCatalogPath() + "/" + destCatalogParams.getDatabaseName() + "/"
-            + syncDBParams.getTable());
+    conf.setString(FlinkOptions.PATH, hudiParameters.getCatalogPath() + "/" +
+        destCatalogParams.getDatabaseName() + "/" + syncDBParams.getTable());
+    conf.setString(FlinkOptions.TABLE_TYPE, hudiParameters.getTableType());
+    String inferredSchema =
+        AvroSchemaConverter.convertToSchema(syncDBParams.getRowType()).toString();
+    conf.setString(FlinkOptions.SOURCE_AVRO_SCHEMA, inferredSchema);
 
     conf.setString(FlinkOptions.INDEX_TYPE, "BUCKET");
     conf.setInteger(FlinkOptions.BUCKET_INDEX_NUM_BUCKETS, 8);
-    conf.setString(FlinkOptions.INDEX_KEY_FIELD, syncDBParams.getSchema().getPrimaryKey()
-        .orElseThrow(() -> new RuntimeException(syncDBParams.getTable() + "no pk "))
-        .getColumnNames().get(0));
-    conf.setString(FlinkOptions.RECORD_KEY_FIELD, syncDBParams.getSchema().getPrimaryKey()
-        .orElseThrow(() -> new RuntimeException(syncDBParams.getTable() + "no pk "))
-        .getColumnNames().get(0));
+    conf.setString(FlinkOptions.INDEX_KEY_FIELD,
+        syncDBParams.getSchema().getPrimaryKey()
+            .orElseThrow(() -> new RuntimeException(syncDBParams.getTable() + "no pk "))
+            .getColumnNames().get(0));
+    conf.setString(FlinkOptions.RECORD_KEY_FIELD,
+        syncDBParams.getSchema().getPrimaryKey()
+            .orElseThrow(() -> new RuntimeException(syncDBParams.getTable() + "no pk "))
+            .getColumnNames().get(0));
     conf.setString(FlinkOptions.PRECOMBINE_FIELD, FlinkOptions.NO_PRE_COMBINE);
+
+    // read and write task set
+    conf.setInteger(FlinkOptions.READ_TASKS, hudiParameters.getReadTasks());
+    conf.setInteger(FlinkOptions.BUCKET_ASSIGN_TASKS, HudiParameters.DEFAULT_BUCKET_ASSIGN_TASK);
+    conf.setInteger(FlinkOptions.WRITE_TASKS, hudiParameters.getWriteTasks());
+
+    // compaction options
+    conf.setString(FlinkOptions.COMPACTION_TRIGGER_STRATEGY, FlinkOptions.NUM_OR_TIME);
     conf.setInteger(FlinkOptions.COMPACTION_DELTA_COMMITS, 1);
-    conf.setString(FlinkOptions.TABLE_TYPE, HoodieTableType.MERGE_ON_READ.name());
-    String inferredSchema = AvroSchemaConverter.convertToSchema(syncDBParams.getRowType())
-        .toString();
-    conf.setString(FlinkOptions.SOURCE_AVRO_SCHEMA, inferredSchema);
+    conf.setInteger(FlinkOptions.COMPACTION_DELTA_SECONDS, 120);
+    conf.setInteger(FlinkOptions.COMPACTION_TASKS, hudiParameters.getCompactionTasks());
+
     return conf;
   }
 }
