@@ -67,7 +67,6 @@ public class MainRunner {
   public static void main(String[] args)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     Class.forName("com.mysql.jdbc.Driver");
-    System.setProperty("HADOOP_USER_NAME", "sloth");
 
     String[] params = parseParams(args);
     String confDir = params[0];
