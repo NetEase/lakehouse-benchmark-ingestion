@@ -39,6 +39,9 @@ public class ArcticConfigOptions {
   public static final ConfigOption<String> ARCTIC_OPTIMIZE_GROUP_NAME =
       ConfigOptions.key("arctic.optimize.group.name").stringType().defaultValue("default");
 
+  public static final ConfigOption<Boolean> ARCTIC_WRITE_UPSERT_ENABLE =
+      ConfigOptions.key("arctic.write.upsert.enable").booleanType().defaultValue(false);
+
   public static final ConfigOption<Integer> ARCTIC_SINK_PARALLELISM =
       ConfigOptions.key("arctic.sink.parallelism").intType().defaultValue(4);
 

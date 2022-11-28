@@ -44,6 +44,9 @@ public class IcebergConfigOptions {
   public static final ConfigOption<String> ICEBERG_CATALOG_TYPE =
       ConfigOptions.key("iceberg.catalog.type").stringType().defaultValue("hive");
 
+  public static final ConfigOption<Boolean> ICEBERG_WRITE_UPSERT_ENABLE =
+      ConfigOptions.key("iceberg.write.upsert.enable").booleanType().defaultValue(false);
+
   public static final ConfigOption<Integer> ICEBERG_SINK_PARALLELISM =
       ConfigOptions.key("iceberg.sink.parallelism").intType().defaultValue(4);
 

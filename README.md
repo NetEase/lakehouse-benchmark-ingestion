@@ -1,5 +1,5 @@
 # 总览
-欢迎使用lakehouse-benchmark-ingestion。lakehouse-benchmark-ingestion 是网易开源的数据湖性能基准测试 lakehouse-benchmark 项目下的数据同步工具，该工具基于 Flink-CDC 实现，能够将数据库中的数据实时同步到数据湖。
+欢迎使用lakehouse-benchmark-ingestion。lakehouse-benchmark-ingestion 是网易开源的数据湖性能基准测试 [lakehouse-benchmark](https://github.com/NetEase/lakehouse-benchmark) 项目下的数据同步工具，该工具基于 Flink-CDC 实现，能够将数据库中的数据实时同步到数据湖。
 
 ## 快速开始
 1. 下载项目代码 `git clone https://github.com/NetEase/lakehouse-benchmark-ingestion.git`
@@ -41,28 +41,30 @@
 | arctic.metastore.url       | 是    | (none)  | Arctic metastore 的 URL 地址 |
 | arctic.optimize.enable     | 是    | true    | 是否开启Arctic Optimize       |
 | arctic.optimize.group.name | 否    | default | Arctic Optimizer 资源组      |
-| arctic.sink.parallelism    | 否    | 4       | Arctic Writer的并发度         |
+| arctic.write.upsert.enable | 否    | false   | 是否开启upsert功能              |
+| arctic.sink.parallelism    | 否    | 4       | Arctic Writer的并行度         |
  
 **Iceberg相关**
 
-| 参数项                      | 是否必须 | 默认值    | 描述                                 |
-|--------------------------|------|--------|------------------------------------|
-| iceberg.uri              | 是    | (none) | Hive metastore 的thrift URI         |
-| iceberg.warehouse        | 是    | (none) | Hive warehouse 的地址                 |
-| iceberg.catalog-type     | 否    | hive   | Iceberg catalog 的类型，支持 hive/hadoop |
-| iceberg.sink.parallelism | 否    | 4      | Iceberg Writer的并发度                 |
+| 参数项                         | 是否必须 | 默认值    | 描述                                 |
+|-----------------------------|------|--------|------------------------------------|
+| iceberg.uri                 | 是    | (none) | Hive metastore 的thrift URI         |
+| iceberg.warehouse           | 是    | (none) | Hive warehouse 的地址                 |
+| iceberg.catalog-type        | 否    | hive   | Iceberg catalog 的类型，支持 hive/hadoop |
+| iceberg.write.upsert.enable | 否    | false  | 是否开启upsert功能                       |
+| iceberg.sink.parallelism    | 否    | 4      | Iceberg Writer的并行度                 |
 
 **Hudi相关**
 
-| 参数项                                   | 是否必须 | 默认值           | 描述                                       |
-|---------------------------------------|------|---------------|------------------------------------------|
-| hudi.catalog.path                     | 是    | (none)        | Hudi Catalog 的地址                         |
-| hudi.hive_sync.enable                 | 否    | true          | 是否开启 hive 同步功能                           |
-| hudi.hive_sync.metastore.uris         | 否    | (none)        | Hive Metastore URL，当开启 hive 同步功能时需要填写该参数 |
-| hudi.table.type                       | 否    | MERGE_ON_READ | 表操作的类型，支持 MERGE_ON_READ/COPY_ON_WRITE    |
-| hudi.read.tasks                       | 否    | 4             | 读算子的并行度                                  |
-| hudi.compaction.tasks                 | 否    | 4             | 在线 compaction 的并行度                       |
-| hudi.compaction.trigger.strategy      | 否    | num_or_time   | 压缩策略                                     |
+| 参数项                              | 是否必须 | 默认值           | 描述                                       |
+|----------------------------------|------|---------------|------------------------------------------|
+| hudi.catalog.path                | 是    | (none)        | Hudi Catalog 的地址                         |
+| hudi.hive_sync.enable            | 否    | true          | 是否开启 hive 同步功能                           |
+| hudi.hive_sync.metastore.uris    | 否    | (none)        | Hive Metastore URL，当开启 hive 同步功能时需要填写该参数 |
+| hudi.table.type                  | 否    | MERGE_ON_READ | 表操作的类型，支持 MERGE_ON_READ/COPY_ON_WRITE    |
+| hudi.read.tasks                  | 否    | 4             | 读算子的并行度                                  |
+| hudi.compaction.tasks            | 否    | 4             | 在线 compaction 的并行度                       |
+| hudi.write.tasks                 | 否    | 4             | 写算子的并行度                                  |
 
 
 ## 已支持的数据库与数据湖Format

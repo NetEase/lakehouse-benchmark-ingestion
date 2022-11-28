@@ -18,6 +18,7 @@ arctic.metastore.url: thrift://ams:1260/local_catalog
 arctic.optimize.enable: true
 ##Arctic相关的可选配置项
 arctic.optimize.group.name: default
+arctic.write.upsert.enable: false
 arctic.sink.parallelism: 4
 
 #如果你选择了Iceberg，请填写以下信息
@@ -25,6 +26,7 @@ iceberg.uri: thrift://metastore:9083
 iceberg.warehouse: /tmp/hive/warehouse
 #iceberg相关的可选配置项
 #iceberg.catalog-type: hive
+iceberg.write.upsert.enable: false
 iceberg.sink.parallelism: 4
 
 #如果你选择了Hudi，请填写以下信息
@@ -37,4 +39,3 @@ hudi.table.type: MERGE_ON_READ
 hudi.read.tasks: 4
 hudi.write.tasks: 4
 hudi.compaction.tasks: 4
-hudi.compaction.trigger.strategy: num_or_time

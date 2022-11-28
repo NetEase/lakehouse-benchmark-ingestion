@@ -40,6 +40,7 @@ import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.types.logical.RowType;
 import org.apache.hudi.common.model.HoodieRecord;
 import org.apache.hudi.configuration.FlinkOptions;
+import org.apache.hudi.hive.NonPartitionedExtractor;
 import org.apache.hudi.sink.utils.Pipelines;
 import org.apache.hudi.util.AvroSchemaConverter;
 import org.apache.hudi.util.StreamerUtil;
@@ -159,6 +160,9 @@ public class HudiCatalogSync extends BaseCatalogSync {
             .orElseThrow(() -> new RuntimeException(syncDBParams.getTable() + "no pk "))
             .getColumnNames().get(0));
     conf.setString(FlinkOptions.PRECOMBINE_FIELD, FlinkOptions.NO_PRE_COMBINE);
+
+    //partition options
+    conf.setString(FlinkOptions.HIVE_SYNC_PARTITION_EXTRACTOR_CLASS_NAME, NonPartitionedExtractor.class.getCanonicalName());
 
     // read and write task set
     conf.setInteger(FlinkOptions.READ_TASKS, hudiParameters.getReadTasks());

@@ -45,6 +45,10 @@ public class ArcticParameters {
     return eduardConfig.getString(ArcticConfigOptions.ARCTIC_OPTIMIZE_GROUP_NAME);
   }
 
+  public boolean getWriteUpsertEnable() {
+    return eduardConfig.getBoolean(ArcticConfigOptions.ARCTIC_WRITE_UPSERT_ENABLE);
+  }
+
   public int getSinkParallelism() {
     return eduardConfig.getInteger(ArcticConfigOptions.ARCTIC_SINK_PARALLELISM);
   }

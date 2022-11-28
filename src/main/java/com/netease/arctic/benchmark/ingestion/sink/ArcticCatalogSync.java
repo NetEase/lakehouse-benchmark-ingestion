@@ -122,7 +122,9 @@ public class ArcticCatalogSync extends BaseCatalogSync {
     if (arcticParameters.getOptimizeEnable()) {
       options.put("optimize.group", arcticParameters.getOptimizeGroupName());
     }
+    if (arcticParameters.getWriteUpsertEnable()) {
+      options.put("write.upsert.enabled", "true");
+    }
     options.put("sink.parallelism", arcticParameters.getSinkParallelism() + "");
-    options.put("write.upsert.enabled", "true");
   }
 }

@@ -32,6 +32,10 @@ public class IcebergParameters {
     this.eduardConfig = Preconditions.checkNotNull(eduardConfig);
   }
 
+  public boolean getWriteUpsertEnable() {
+    return eduardConfig.getBoolean(IcebergConfigOptions.ICEBERG_WRITE_UPSERT_ENABLE);
+  }
+
   public int getSinkParallelism() {
     return eduardConfig.getInteger(IcebergConfigOptions.ICEBERG_SINK_PARALLELISM);
   }

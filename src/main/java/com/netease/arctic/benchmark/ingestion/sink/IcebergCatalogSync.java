@@ -109,6 +109,9 @@ public class IcebergCatalogSync extends BaseCatalogSync {
   }
 
   private void fillIcebergTableOptions(Map<String, String> options) {
+    if (icebergParameters.getWriteUpsertEnable()) {
+      options.put("write.upsert.enabled", "true");
+    }
     options.put("format-version", "2");
     options.put("write.metadata.metrics.default", "full");
   }
