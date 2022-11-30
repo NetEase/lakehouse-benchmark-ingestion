@@ -161,8 +161,9 @@ public class HudiCatalogSync extends BaseCatalogSync {
             .getColumnNames().get(0));
     conf.setString(FlinkOptions.PRECOMBINE_FIELD, FlinkOptions.NO_PRE_COMBINE);
 
-    //partition options
-    conf.setString(FlinkOptions.HIVE_SYNC_PARTITION_EXTRACTOR_CLASS_NAME, NonPartitionedExtractor.class.getCanonicalName());
+    // partition options
+    conf.setString(FlinkOptions.HIVE_SYNC_PARTITION_EXTRACTOR_CLASS_NAME,
+        NonPartitionedExtractor.class.getCanonicalName());
 
     // read and write task set
     conf.setInteger(FlinkOptions.READ_TASKS, hudiParameters.getReadTasks());

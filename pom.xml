@@ -21,7 +21,7 @@
     <flink.version>1.14.6</flink.version>
     <scala.binary.version>2.12</scala.binary.version>
     <iceberg.version>0.14.0</iceberg.version>
-    <arctic.version>0.4.0-SNAPSHOT</arctic.version>
+    <arctic.version>0.4.0</arctic.version>
     <hudi.version>0.11.1</hudi.version>
     <flink-connector-mysql-cdc.version>2.3.0</flink-connector-mysql-cdc.version>
     <lombok.version>1.18.20</lombok.version>
@@ -419,7 +419,9 @@
                 </relocation>
               </relocations>
               <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>com.netease.arctic.benchmark.ingestion.MainRunner</mainClass>
+                </transformer>
               </transformers>
             </configuration>
           </execution>

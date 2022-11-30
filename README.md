@@ -3,7 +3,7 @@
 
 ## 快速开始
 1. 下载项目代码 `git clone https://github.com/NetEase/lakehouse-benchmark-ingestion.git`
-2. 参考相关说明部分，构建项目所需的依赖 
+2. 参考[相关说明](#_2)部分，构建项目所需的依赖 
 3. 通过命令`mvn clean install -DskipTests`编译项目。进入 target 目录，通过`tar -zxvf lakehouse_benchmark_ingestion.tar.gz`命令解压得到 lakehouse-benchmark-ingestion-1.0-SNAPSHOT.jar 和 conf 目录
 4. 修改 conf 目录下的 ingestion-conf.yaml ，填写配置项信息 
 5. 通过`java -cp lakehouse-benchmark-ingestion-1.0-SNAPSHOT.jar com.netease.arctic.benchmark.ingestion.MainRunner -confDir [confDir] -sinkType [arctic/iceberg/hudi] -sinkDatabase [dbName]`命令启动数据同步工具 
@@ -76,5 +76,5 @@
 3. [Hudi](https://hudi.apache.org/cn/)
 
 ## 相关说明
-* 本项目使用的arctic-flink-runtime-1.14依赖需要基于Arctic工程进行源码编译，请下载[Arctic工程](https://github.com/NetEase/arctic)的代码，然后切换到master分支，执行命令`mvn clean install -DskipTests`进行构建
-* 本项目使用的hudi-flink1.14-bundle_2.12依赖需要基于Hudi工程进行源码编译，请下载[Hudi工程](https://github.com/apache/hudi)的代码，然后切换到release-0.11.1，执行命令`mvn clean install -DskipTests -Dflink1.14 -Dscala-2.12`进行构建
+* 本项目使用的arctic-flink-runtime-1.14依赖需要基于Arctic工程进行源码编译，请通过命令`git clone https://github.com/NetEase/arctic.git -b 0.4.x`下载[Arctic工程](https://github.com/NetEase/arctic)的代码并切换到0.4.x分支，执行命令`mvn clean install -DskipTests -pl '!trino'`进行构建
+* 本项目使用的hudi-flink1.14-bundle_2.12依赖需要基于Hudi工程进行源码编译，请通过命令`git clone https://github.com/apache/hudi.git -b release-0.11.1`下载[Hudi工程](https://github.com/apache/hudi)的代码并切换到release-0.11.1，执行命令`mvn clean install -DskipTests -Dflink1.14 -Dscala-2.12`进行构建
