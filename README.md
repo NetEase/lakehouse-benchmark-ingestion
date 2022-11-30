@@ -3,7 +3,7 @@
 
 ## 快速开始
 1. 下载项目代码 `git clone https://github.com/NetEase/lakehouse-benchmark-ingestion.git`
-2. 参考[相关说明](#_2)部分，构建项目所需的依赖 
+2. 参考[相关说明](#相关说明)部分，构建项目所需的依赖 
 3. 通过命令`mvn clean install -DskipTests`编译项目。进入 target 目录，通过`tar -zxvf lakehouse_benchmark_ingestion.tar.gz`命令解压得到 lakehouse-benchmark-ingestion-1.0-SNAPSHOT.jar 和 conf 目录
 4. 修改 conf 目录下的 ingestion-conf.yaml ，填写配置项信息 
 5. 通过`java -cp lakehouse-benchmark-ingestion-1.0-SNAPSHOT.jar com.netease.arctic.benchmark.ingestion.MainRunner -confDir [confDir] -sinkType [arctic/iceberg/hudi] -sinkDatabase [dbName]`命令启动数据同步工具 
