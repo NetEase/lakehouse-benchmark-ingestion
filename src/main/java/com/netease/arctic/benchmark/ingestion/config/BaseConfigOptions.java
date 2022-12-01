@@ -54,4 +54,7 @@ public class BaseConfigOptions {
 
   public static final ConfigOption<Integer> SOURCE_PARALLELISM =
       ConfigOptions.key("source.parallelism").intType().defaultValue(4);
+
+  public static final ConfigOption<String> HADOOP_USER_NAME =
+      ConfigOptions.key("hadoop.user.name").stringType().defaultValue("");
 }

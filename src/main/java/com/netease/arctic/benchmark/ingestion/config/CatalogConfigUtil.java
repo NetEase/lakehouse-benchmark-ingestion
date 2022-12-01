@@ -18,9 +18,15 @@
 package com.netease.arctic.benchmark.ingestion.config;
 
 import com.netease.arctic.benchmark.ingestion.params.database.BaseParameters;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
+import static com.netease.arctic.benchmark.ingestion.config.HudiConfigOptions.HUDI_CATALOG_PATH;
 
 /**
  * An util class of catalog config properties manager
@@ -39,7 +45,8 @@ public class CatalogConfigUtil {
     sourceProps.put("port", baseParameters.getSourcePort());
   }
 
-  public static void getSinkCatalogProps(String sinkType, Map<String, String> sinkProps) {
+  public static void getSinkCatalogProps(String sinkType, Map<String, String> sinkProps,
+      Map<String, String> props) throws URISyntaxException, IOException {
     switch (sinkType) {
       case "arctic":
         ArcticConfigOptions.fillRequiredOptions(sinkProps);
@@ -48,6 +55,7 @@ public class CatalogConfigUtil {
         IcebergConfigOptions.fillRequiredOptions(sinkProps);
         break;
       case "hudi":
+        createWarehouseDir(props.get(HUDI_CATALOG_PATH.key()));
         HudiConfigOptions.fillRequiredOptions(sinkProps);
         break;
       default:
@@ -67,6 +75,40 @@ public class CatalogConfigUtil {
       default:
         LOG.error("sinkType:{} is not supported now", sinkType);
         return null;
+    }
+  }
+
+  private static void createWarehouseDir(String path) throws URISyntaxException, IOException {
+    checkValidatePath(path);
+    org.apache.hadoop.conf.Configuration configuration = new org.apache.hadoop.conf.Configuration();
+    if (isLocalPath(path)) {
+      FileSystem fileSystem = FileSystem.get(configuration);
+      Path localPath = new Path(path);
+      LOG.info("Hadoop Directory for warehouse created result: {}", fileSystem.mkdirs(localPath));
+    } else {
+      String[] urlMsg = parseWarehousePath(path);
+      FileSystem fileSystem = FileSystem.get(new URI(urlMsg[0]), configuration);
+      Path remotePath = new Path(urlMsg[1]);
+      LOG.info("Hadoop Directory for warehouse created result: {}", fileSystem.mkdirs(remotePath));
+    }
+  }
+
+  private static String[] parseWarehousePath(String path) throws URISyntaxException {
+    String[] result = new String[2];
+    String port = new URI(path).getPort() + "";
+    int portIdx = path.indexOf(port);
+    result[0] = path.substring(0, portIdx + port.length());
+    result[1] = path.substring(portIdx + port.length());
+    return result;
+  }
+
+  private static boolean isLocalPath(String path) {
+    return !path.startsWith("hdfs://");
+  }
+
+  private static void checkValidatePath(String path) {
+    if (!(path.startsWith("hdfs://") || path.startsWith("/"))) {
+      throw new RuntimeException("The path " + path + " for warehouse is not validate ");
     }
   }
 

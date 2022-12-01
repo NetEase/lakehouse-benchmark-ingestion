@@ -46,6 +46,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,8 +65,8 @@ public class MainRunner {
   private static StreamTableEnvironment tableEnv;
   public static final String EDUARD_CONF_FILENAME = "ingestion-conf.yaml";
 
-  public static void main(String[] args)
-      throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+  public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
+      IllegalAccessException, URISyntaxException, IOException {
     Class.forName("com.mysql.jdbc.Driver");
 
     String[] params = parseParams(args);
@@ -76,6 +77,9 @@ public class MainRunner {
     Map<String, String> props = new HashMap<>();
     Configuration configuration = loadConfiguration(confDir, props);
     BaseParameters baseParameters = new BaseParameters(configuration, sinkType, sinkDatabase);
+    if (!baseParameters.getHadoopUserName().isEmpty()) {
+      System.setProperty("HADOOP_USER_NAME", baseParameters.getHadoopUserName());
+    }
 
     env = StreamExecutionEnvironment.getExecutionEnvironment(setFlinkConf(restPort));
     env.setStateBackend(new FsStateBackend("file:///tmp/benchmark-ingestion"));
@@ -123,11 +127,12 @@ public class MainRunner {
     ((StreamTableEnvironmentImpl) tableEnv).executeInternal(operation);
   }
 
-  private static void createSinkCatalog(String sinkType, Map<String, String> props) {
+  private static void createSinkCatalog(String sinkType, Map<String, String> props)
+      throws URISyntaxException, IOException {
     sinkType = sinkType.toLowerCase();
     String catalogName = sinkType + "_catalog_ignore";
     Map<String, String> sinkProps = new HashMap<>();
-    CatalogConfigUtil.getSinkCatalogProps(sinkType, sinkProps);
+    CatalogConfigUtil.getSinkCatalogProps(sinkType, sinkProps, props);
     for (String key : CatalogConfigUtil.filterCatalogParams(sinkType, props).keySet()) {
       if (key.startsWith(sinkType)) {
         sinkProps.put(key.substring(sinkType.length() + 1), props.get(key));

@@ -33,16 +33,18 @@
 | source.scan.startup.mode | 否    | initial | MySQL CDC connector 消费 binlog 时的启动模式，支持 initial/latest-offset |
 | source.server.timezone   | 否    | (none)  | MySQL数据库服务器的会话时区                                              |
 | source.parallelism       | 否    | 4       | 读取源端数据时的任务并行度                                                 |      |         |                                                       |
+| hadoop.user.name         | 否    | (none)  | 用于设置 HADOOP_USER_NAME 的值                                      |
 
 **Arctic相关**
 
-| 参数项                        | 是否必须 | 默认值     | 描述                        |
-|----------------------------|------|---------|---------------------------|
-| arctic.metastore.url       | 是    | (none)  | Arctic metastore 的 URL 地址 |
-| arctic.optimize.enable     | 是    | true    | 是否开启Arctic Optimize       |
-| arctic.optimize.group.name | 否    | default | Arctic Optimizer 资源组      |
-| arctic.write.upsert.enable | 否    | false   | 是否开启upsert功能              |
-| arctic.sink.parallelism    | 否    | 4       | Arctic Writer的并行度         |
+| 参数项                         | 是否必须 | 默认值     | 描述                                             |
+|-----------------------------|------|---------|------------------------------------------------|
+| arctic.metastore.url        | 是    | (none)  | Arctic metastore 的 URL 地址                      |
+| arctic.optimize.enable      | 是    | true    | 是否开启Arctic Optimize                            |
+| arctic.optimize.group.name  | 否    | default | Arctic Optimizer 资源组                           |
+| arctic.optimize.table.quota | 否    | (none)  | 指定 Arctic 表占用 Optimizer 资源的配额，支持指定多张表，以Map形式传入 |
+| arctic.write.upsert.enable  | 否    | false   | 是否开启upsert功能                                   |
+| arctic.sink.parallelism     | 否    | 4       | Arctic Writer的并行度                              |
  
 **Iceberg相关**
 

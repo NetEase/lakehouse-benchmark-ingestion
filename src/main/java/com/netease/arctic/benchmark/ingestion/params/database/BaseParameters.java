@@ -89,4 +89,8 @@ public class BaseParameters {
     return eduardConfig.getInteger(BaseConfigOptions.SOURCE_PARALLELISM);
   }
 
+  public String getHadoopUserName() {
+    return eduardConfig.getString(BaseConfigOptions.HADOOP_USER_NAME);
+  }
+
 }

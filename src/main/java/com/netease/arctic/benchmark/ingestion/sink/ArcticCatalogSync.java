@@ -71,12 +71,12 @@ public class ArcticCatalogSync extends BaseCatalogSync {
       }
     }
 
-    final Map<String, String> options = new HashMap<>();
-    fillArcticTableOptions(options);
-
     pathAndTable.forEach(e -> {
       try {
-        ObjectPath objectPath = new ObjectPath(dbName, e.f0.getObjectName());
+        String tableName = e.f0.getObjectName();
+        final Map<String, String> options = new HashMap<>();
+        fillArcticTableOptions(options,tableName);
+        ObjectPath objectPath = new ObjectPath(dbName, tableName);
 
         if (arctic.tableExists(objectPath)) {
           arctic.dropTable(objectPath, true);
@@ -118,9 +118,13 @@ public class ArcticCatalogSync extends BaseCatalogSync {
     });
   }
 
-  private void fillArcticTableOptions(Map<String, String> options) {
+  private void fillArcticTableOptions(Map<String, String> options,String tableName) {
     if (arcticParameters.getOptimizeEnable()) {
       options.put("optimize.group", arcticParameters.getOptimizeGroupName());
+      Map<String, String> optimizeTableQuota = arcticParameters.getOptimizeTableQuota();
+      if (optimizeTableQuota.containsKey(tableName)) {
+        options.put("optimize.quota", optimizeTableQuota.get(tableName));
+      }
     }
     if (arcticParameters.getWriteUpsertEnable()) {
       options.put("write.upsert.enabled", "true");

@@ -28,6 +28,7 @@ import java.util.Map;
  * {@link ConfigOption}s for {@link com.netease.arctic.benchmark.ingestion.sink.ArcticCatalogSync}.
  */
 public class ArcticConfigOptions {
+
   public static final String TYPE = "arctic";
 
   public static final ConfigOption<String> ARCTIC_METASTORE_URL =
@@ -38,6 +39,9 @@ public class ArcticConfigOptions {
 
   public static final ConfigOption<String> ARCTIC_OPTIMIZE_GROUP_NAME =
       ConfigOptions.key("arctic.optimize.group.name").stringType().defaultValue("default");
+
+  public static final ConfigOption<Map<String,String>> ARCTIC_OPTIMIZE_TABLE_QUOTA =
+      ConfigOptions.key("arctic.optimize.table.quota").mapType().noDefaultValue();
 
   public static final ConfigOption<Boolean> ARCTIC_WRITE_UPSERT_ENABLE =
       ConfigOptions.key("arctic.write.upsert.enable").booleanType().defaultValue(false);

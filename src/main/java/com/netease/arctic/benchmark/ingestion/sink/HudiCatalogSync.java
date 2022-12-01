@@ -41,6 +41,7 @@ import org.apache.flink.table.types.logical.RowType;
 import org.apache.hudi.common.model.HoodieRecord;
 import org.apache.hudi.configuration.FlinkOptions;
 import org.apache.hudi.hive.NonPartitionedExtractor;
+import org.apache.hudi.keygen.ComplexAvroKeyGenerator;
 import org.apache.hudi.sink.utils.Pipelines;
 import org.apache.hudi.util.AvroSchemaConverter;
 import org.apache.hudi.util.StreamerUtil;
@@ -90,9 +91,7 @@ public class HudiCatalogSync extends BaseCatalogSync {
         }
         hudi.createTable(objectPath,
             new ResolvedCatalogTable(e.f1.copy(options), e.f1.getResolvedSchema()), false);
-      } catch (TableAlreadyExistException ex) {
-        ex.printStackTrace();
-      } catch (DatabaseNotExistException ex) {
+      } catch (TableAlreadyExistException | DatabaseNotExistException ex) {
         ex.printStackTrace();
       } catch (TableNotExistException ex) {
         throw new RuntimeException(ex);
@@ -130,6 +129,7 @@ public class HudiCatalogSync extends BaseCatalogSync {
       options.put("hive_sync.support_timestamp", "true");
     }
     options.put("table.type", hudiParameters.getTableType());
+    options.put("write.precombine.field", FlinkOptions.NO_PRE_COMBINE);
   }
 
   private Configuration buildConfiguration(SyncDBParams syncDBParams,
@@ -152,13 +152,11 @@ public class HudiCatalogSync extends BaseCatalogSync {
     conf.setInteger(FlinkOptions.BUCKET_INDEX_NUM_BUCKETS,
         HudiParameters.DEFAULT_BUCKET_INDEX_NUM_BUCKETS);
     conf.setString(FlinkOptions.INDEX_KEY_FIELD,
-        syncDBParams.getSchema().getPrimaryKey()
-            .orElseThrow(() -> new RuntimeException(syncDBParams.getTable() + "no pk "))
-            .getColumnNames().get(0));
+        String.join(",", syncDBParams.getSchema().getPrimaryKey().get().getColumnNames()));
     conf.setString(FlinkOptions.RECORD_KEY_FIELD,
-        syncDBParams.getSchema().getPrimaryKey()
-            .orElseThrow(() -> new RuntimeException(syncDBParams.getTable() + "no pk "))
-            .getColumnNames().get(0));
+        String.join(",", syncDBParams.getSchema().getPrimaryKey().get().getColumnNames()));
+    conf.setString(FlinkOptions.KEYGEN_CLASS_NAME,
+        ComplexAvroKeyGenerator.class.getCanonicalName());
     conf.setString(FlinkOptions.PRECOMBINE_FIELD, FlinkOptions.NO_PRE_COMBINE);
 
     // partition options

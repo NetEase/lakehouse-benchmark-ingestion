@@ -20,6 +20,8 @@ package com.netease.arctic.benchmark.ingestion.params.table;
 import com.netease.arctic.benchmark.ingestion.config.ArcticConfigOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Preconditions;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * A utility class helps parse and manage Arctic table parameters that are used for create Arctic
@@ -43,6 +45,11 @@ public class ArcticParameters {
 
   public String getOptimizeGroupName() {
     return eduardConfig.getString(ArcticConfigOptions.ARCTIC_OPTIMIZE_GROUP_NAME);
+  }
+
+  public Map<String, String> getOptimizeTableQuota() {
+    return eduardConfig.getOptional(ArcticConfigOptions.ARCTIC_OPTIMIZE_TABLE_QUOTA)
+        .orElse(Collections.emptyMap());
   }
 
   public boolean getWriteUpsertEnable() {
