@@ -75,7 +75,7 @@ public class ArcticCatalogSync extends BaseCatalogSync {
       try {
         String tableName = e.f0.getObjectName();
         final Map<String, String> options = new HashMap<>();
-        fillArcticTableOptions(options,tableName);
+        fillArcticTableOptions(options, tableName);
         ObjectPath objectPath = new ObjectPath(dbName, tableName);
 
         if (arctic.tableExists(objectPath)) {
@@ -118,7 +118,7 @@ public class ArcticCatalogSync extends BaseCatalogSync {
     });
   }
 
-  private void fillArcticTableOptions(Map<String, String> options,String tableName) {
+  private void fillArcticTableOptions(Map<String, String> options, String tableName) {
     if (arcticParameters.getOptimizeEnable()) {
       options.put("optimize.group", arcticParameters.getOptimizeGroupName());
       Map<String, String> optimizeTableQuota = arcticParameters.getOptimizeTableQuota();

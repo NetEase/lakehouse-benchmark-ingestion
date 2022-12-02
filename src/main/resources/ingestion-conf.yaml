@@ -11,6 +11,7 @@ source.table.name: *
 #source.scan.startup.mode: initial
 #source.server.timezone: Asia/Shanghai
 #source.parallelism: 4
+#hadoop.user.name: root
 
 #根据选择的sink端数据湖format的类型，填写相应信息
 #如果你选择了Arctic，请填写以下信息
@@ -18,6 +19,7 @@ arctic.metastore.url: thrift://ams:1260/local_catalog
 arctic.optimize.enable: true
 ##Arctic相关的可选配置项
 arctic.optimize.group.name: default
+arctic.optimize.table.quota: customer:40,order_line:20,stock:50
 arctic.write.upsert.enable: false
 arctic.sink.parallelism: 4
 
