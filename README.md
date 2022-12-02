@@ -2,12 +2,22 @@
 欢迎使用lakehouse-benchmark-ingestion。lakehouse-benchmark-ingestion 是网易开源的数据湖性能基准测试 [lakehouse-benchmark](https://github.com/NetEase/lakehouse-benchmark) 项目下的数据同步工具，该工具基于 Flink-CDC 实现，能够将数据库中的数据实时同步到数据湖。
 
 ## 快速开始
+1. 通过命令 `wget https://github.com/NetEase/lakehouse-benchmark-ingestion/releases/download/beta-1.0-arctic-0.4/lakehouse_benchmark_ingestion.tar.gz` 下载项目相关的 release 包，并通过`tar -zxvf lakehouse_benchmark_ingestion.tar.gz`命令解压得到 lakehouse-benchmark-ingestion-1.0-SNAPSHOT.jar 和 conf 目录 
+2. 修改 conf 目录下的 ingestion-conf.yaml ，填写配置项信息 
+3. 通过`java -cp lakehouse-benchmark-ingestion-1.0-SNAPSHOT.jar com.netease.arctic.benchmark.ingestion.MainRunner -confDir [confDir] -sinkType [arctic/iceberg/hudi] -sinkDatabase [dbName]`命令启动数据同步工具 
+4. 通过`localhost:8081`打开 Flink Web UI ，观察数据同步的情况
+
+除了[快速开始](#快速开始)部分通过 release 包启动 lakehouse-benchmark-ingestion 工具，您也可以选择从源码进行构建或者在 Docker 模式下进行部署的方式。
+## 从源码构建
 1. 下载项目代码 `git clone https://github.com/NetEase/lakehouse-benchmark-ingestion.git`
-2. 参考[相关说明](#相关说明)部分，构建项目所需的依赖 
+2. 参考[源码构建相关说明](#源码构建相关说明)部分，构建项目所需的依赖
 3. 通过命令`mvn clean install -DskipTests`编译项目。进入 target 目录，通过`tar -zxvf lakehouse_benchmark_ingestion.tar.gz`命令解压得到 lakehouse-benchmark-ingestion-1.0-SNAPSHOT.jar 和 conf 目录
-4. 修改 conf 目录下的 ingestion-conf.yaml ，填写配置项信息 
-5. 通过`java -cp lakehouse-benchmark-ingestion-1.0-SNAPSHOT.jar com.netease.arctic.benchmark.ingestion.MainRunner -confDir [confDir] -sinkType [arctic/iceberg/hudi] -sinkDatabase [dbName]`命令启动数据同步工具 
+4. 修改 conf 目录下的 ingestion-conf.yaml ，填写配置项信息
+5. 通过`java -cp lakehouse-benchmark-ingestion-1.0-SNAPSHOT.jar com.netease.arctic.benchmark.ingestion.MainRunner -confDir [confDir] -sinkType [arctic/iceberg/hudi] -sinkDatabase [dbName]`命令启动数据同步工具
 6. 通过`localhost:8081`打开 Flink Web UI ，观察数据同步的情况
+
+## Docker模式下部署
+请参考 [lakehouse-benchmark](https://github.com/NetEase/lakehouse-benchmark) 项目的[ Docker 部署文档](https://github.com/NetEase/lakehouse-benchmark/tree/master/docker/benchmark)
 
 ## 支持的参数
 ### 命令行参数
@@ -77,6 +87,19 @@
 2. [Iceberg](https://iceberg.apache.org/)
 3. [Hudi](https://hudi.apache.org/cn/)
 
-## 相关说明
-* 本项目使用的arctic-flink-runtime-1.14依赖需要基于Arctic工程进行源码编译，请通过命令`git clone https://github.com/NetEase/arctic.git -b 0.4.x`下载[Arctic工程](https://github.com/NetEase/arctic)的代码并切换到0.4.x分支，执行命令`mvn clean install -DskipTests -pl '!trino'`进行构建
-* 本项目使用的hudi-flink1.14-bundle_2.12依赖需要基于Hudi工程进行源码编译，请通过命令`git clone https://github.com/apache/hudi.git -b release-0.11.1`下载[Hudi工程](https://github.com/apache/hudi)的代码并切换到release-0.11.1，执行命令`mvn clean install -DskipTests -Dflink1.14 -Dscala-2.12`进行构建
+
+## 源码构建相关说明
+* 本项目使用的 arctic-flink-runtime-1.14 依赖需要基于Arctic工程进行源码编译，请通过命令`git clone https://github.com/NetEase/arctic.git -b 0.4.x`下载[ Arctic 工程](https://github.com/NetEase/arctic)的代码并切换到 0.4.x 分支，执行命令`mvn clean install -DskipTests -pl '!trino'`进行构建
+* 本项目使用的 hudi-flink1.14-bundle_2.12 依赖需要基于Hudi工程进行源码编译，请通过命令`git clone https://github.com/apache/hudi.git -b release-0.11.1`下载[ Hudi 工程](https://github.com/apache/hudi)的代码并切换到 release-0.11.1 ，执行命令`mvn clean install -DskipTests -Dflink1.14 -Dscala-2.12`进行构建
+
+## 项目依赖的版本信息
+
+| Maven依赖项  | 版本信息   |
+|-----------|--------|
+| Flink     | 1.14.6 |
+| Flink-CDC | 2.3.0  |
+| Hadoop    | 2.9.2  |
+| Hive      | 2.1.1  |
+| Arctic    | 0.4.x  |
+| Iceberg   | 0.14.0 |
+| Hudi      | 0.11.1 |
